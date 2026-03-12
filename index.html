@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Ứng dụng Web 3D tương tác - Thiết kế và lập trình đồ họa nâng cao với Three.js" />
+    <title>3D Interactive World | Three.js Showcase</title>
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Loading Screen -->
+      <div id="loading-screen">
+        <div class="loader-content">
+          <div class="loader-logo">3D<span>World</span></div>
+          <div class="loader-bar-wrap">
+            <div class="loader-bar" id="loader-bar"></div>
+          </div>
+          <div class="loader-text" id="loader-text">Đang khởi tạo scene...</div>
+        </div>
+      </div>
+
+      <!-- Canvas -->
+      <canvas id="three-canvas"></canvas>
+
+      <!-- Top bar -->
+      <header id="top-bar">
+        <div class="top-bar-left">
+          <span class="brand"><strong>Nội thất 3D</strong></span>
+          <span class="scene-name">Interactive Showcase</span>
+        </div>
+        <div class="top-bar-right">
+          <div id="stats-inline">
+            <span id="fps-display">-- FPS</span>
+            <span id="dc-display">-- DC</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Panel Toggle Tab (always visible) -->
+      <button id="panel-toggle" title="Đóng/Mở panel">‹</button>
+
+      <!-- Side Control Panel -->
+      <aside id="control-panel">
+        <div class="panel-header">
+          <span class="panel-icon">⚙</span>
+          <span>Bảng điều khiển</span>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+          <button class="tab-btn active" data-tab="layers">📦 Vật thể</button>
+          <button class="tab-btn" data-tab="materials">🎨 Vật liệu</button>
+          <button class="tab-btn" data-tab="lights">💡 Ánh sáng</button>
+        </div>
+
+        <!-- Tab: Layers -->
+        <div class="tab-content active" id="tab-layers">
+          <div class="section-title">Hiển thị / Ẩn đối tượng</div>
+          <div id="layer-list" class="layer-list"></div>
+        </div>
+
+        <!-- Tab: Materials -->
+        <div class="tab-content" id="tab-materials">
+          <div class="section-title">Chọn vật liệu cho đối tượng</div>
+          <div class="form-group">
+            <label>Đối tượng</label>
+            <select id="mat-object-select"></select>
+          </div>
+          <div class="form-group">
+            <label>Loại vật liệu</label>
+            <select id="mat-type-select">
+              <option value="original" selected>🔄 Gốc (Original)</option>
+              <option value="standard">Standard (PBR)</option>
+              <option value="phong">Phong (Shiny)</option>
+              <option value="toon">Toon (Cel-shading)</option>
+              <option value="wireframe">Wireframe</option>
+              <option value="normal">Normal Map</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Màu sắc</label>
+            <div class="color-row">
+              <input type="color" id="mat-color" value="#ffffff" />
+              <span id="mat-color-hex">#ffffff</span>
+            </div>
+          </div>
+          <div class="form-group" id="roughness-group">
+            <label>Roughness: <span id="roughness-val">0.5</span></label>
+            <input type="range" id="mat-roughness" min="0" max="1" step="0.01" value="0.5" />
+          </div>
+          <div class="form-group" id="metalness-group">
+            <label>Metalness: <span id="metalness-val">0.0</span></label>
+            <input type="range" id="mat-metalness" min="0" max="1" step="0.01" value="0" />
+          </div>
+          <button class="apply-btn" id="apply-material-btn">✓ Áp dụng vật liệu</button>
+        </div>
+
+        <!-- Tab: Lights -->
+        <div class="tab-content" id="tab-lights">
+          <div class="section-title">Điều chỉnh ánh sáng</div>
+
+          <!-- Ambient -->
+          <div class="light-card">
+            <div class="light-card-header">
+              <span>🌐 Ambient Light</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="ambient-toggle" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label>Cường độ: <span id="ambient-int-val">0.3</span></label>
+              <input type="range" id="ambient-intensity" min="0" max="2" step="0.05" value="0.3" />
+            </div>
+          </div>
+
+          <!-- Directional -->
+          <div class="light-card">
+            <div class="light-card-header">
+              <span>☀️ Directional Light</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="dir-toggle" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label>Cường độ: <span id="dir-int-val">1.0</span></label>
+              <input type="range" id="dir-intensity" min="0" max="5" step="0.1" value="1" />
+            </div>
+            <div class="form-group">
+              <label>Màu</label>
+              <input type="color" id="dir-color" value="#ffffff" />
+            </div>
+          </div>
+
+          <!-- Point Light -->
+          <div class="light-card">
+            <div class="light-card-header">
+              <span>💡 Point Light</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="point-toggle" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label>Cường độ: <span id="point-int-val">80</span></label>
+              <input type="range" id="point-intensity" min="0" max="300" step="5" value="80" />
+            </div>
+            <div class="form-group">
+              <label>Màu</label>
+              <input type="color" id="point-color" value="#ff6030" />
+            </div>
+          </div>
+
+          <!-- Spot Light -->
+          <div class="light-card">
+            <div class="light-card-header">
+              <span>🔦 Spot Light</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="spot-toggle" checked />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="form-group">
+              <label>Cường độ: <span id="spot-int-val">120</span></label>
+              <input type="range" id="spot-intensity" min="0" max="500" step="10" value="120" />
+            </div>
+            <div class="form-group">
+              <label>Màu</label>
+              <input type="color" id="spot-color" value="#4080ff" />
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Tooltip -->
+      <div id="tooltip" class="tooltip hidden"></div>
+
+      <!-- Bottom info bar -->
+      <footer id="bottom-bar">
+        <span>🖱️ Kéo để xoay · Scroll để zoom · Click chọn đối tượng</span>
+        <span id="selected-obj">Chưa chọn đối tượng</span>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
