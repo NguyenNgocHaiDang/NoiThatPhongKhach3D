@@ -88,6 +88,14 @@ export class ObjectManager {
 
   /** Kiểm tra xem một object có thuộc group cấu hình thủ công hay không */
   static #getManualGroupId(...candidateNames) {
+    for (const candidateName of candidateNames) {
+      for (const group of UI_GROUPS) {
+        if (group.members.includes(candidateName)) {
+          return group.id;
+        }
+      }
+    }
+
     const numbers = candidateNames
       .map((name) => ObjectManager.#parseObjectNumber(name))
       .filter((num) => num !== null);
