@@ -1,4 +1,4 @@
-import { OrbitControls as ThreeOrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { OrbitControls as ThreeOrbitControls } from "three/addons/controls/OrbitControls.js";
 
 export class OrbitControls {
   /** @type {ThreeOrbitControls} */
@@ -12,7 +12,7 @@ export class OrbitControls {
     this.instance.maxDistance = 60;
     this.instance.maxPolarAngle = Math.PI * 0.85;
     this.instance.target.set(0, 1, 0);
-    this.instance.update(); // Bắt buộc gọi sau khi set target
+    this.instance.update();
   }
 
   update() {

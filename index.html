@@ -1,25 +1,24 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Ứng dụng Web 3D tương tác - Thiết kế và lập trình đồ họa nâng cao với Three.js" />
-    <title>3D Interactive World | Three.js Showcase</title>
+    <title>Nội thất phòng khách</title>
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div id="app">
       <!-- Loading Screen -->
       <div id="loading-screen">
         <div class="loader-content">
-          <div class="loader-logo">3D<span>World</span></div>
-          <div class="loader-bar-wrap">
-            <div class="loader-bar" id="loader-bar"></div>
-          </div>
-          <div class="loader-text" id="loader-text">Đang khởi tạo scene...</div>
+          <div class="loader-text" id="loader-text">Đang tải</div>
         </div>
       </div>
 
@@ -29,8 +28,7 @@
       <!-- Top bar -->
       <header id="top-bar">
         <div class="top-bar-left">
-          <span class="brand"><strong>Nội thất 3D</strong></span>
-          <span class="scene-name">Interactive Showcase</span>
+          <span class="brand"><strong>Nội thất</strong> phòng khách</span>
         </div>
         <div class="top-bar-right">
           <div id="stats-inline">
@@ -46,15 +44,15 @@
       <!-- Side Control Panel -->
       <aside id="control-panel">
         <div class="panel-header">
-          <span class="panel-icon">⚙</span>
-          <span>Bảng điều khiển</span>
+          <span class="panel-kicker">Điều khiển cảnh</span>
+          <span class="panel-title">Bảng điều khiển</span>
         </div>
 
         <!-- Tab Navigation -->
         <div class="tab-nav">
-          <button class="tab-btn active" data-tab="layers">📦 Vật thể</button>
-          <button class="tab-btn" data-tab="materials">🎨 Vật liệu</button>
-          <button class="tab-btn" data-tab="lights">💡 Ánh sáng</button>
+          <button class="tab-btn active" data-tab="layers">Vật thể</button>
+          <button class="tab-btn" data-tab="materials">Vật liệu</button>
+          <button class="tab-btn" data-tab="lights">Ánh sáng</button>
         </div>
 
         <!-- Tab: Layers -->
@@ -73,12 +71,12 @@
           <div class="form-group">
             <label>Loại vật liệu</label>
             <select id="mat-type-select">
-              <option value="original" selected>🔄 Gốc (Original)</option>
-              <option value="standard">Standard (PBR)</option>
-              <option value="phong">Phong (Shiny)</option>
-              <option value="toon">Toon (Cel-shading)</option>
-              <option value="wireframe">Wireframe</option>
-              <option value="normal">Normal Map</option>
+              <option value="original" selected>Gốc</option>
+              <option value="standard">Chuẩn PBR</option>
+              <option value="phong">Phong bóng</option>
+              <option value="toon">Toon hoạt họa</option>
+              <option value="wireframe">Khung lưới</option>
+              <option value="normal">Pháp tuyến</option>
             </select>
           </div>
           <div class="form-group">
@@ -89,14 +87,14 @@
             </div>
           </div>
           <div class="form-group" id="roughness-group">
-            <label>Roughness: <span id="roughness-val">0.5</span></label>
+            <label>Độ nhám: <span id="roughness-val">0.5</span></label>
             <input type="range" id="mat-roughness" min="0" max="1" step="0.01" value="0.5" />
           </div>
           <div class="form-group" id="metalness-group">
-            <label>Metalness: <span id="metalness-val">0.0</span></label>
+            <label>Độ kim loại: <span id="metalness-val">0.0</span></label>
             <input type="range" id="mat-metalness" min="0" max="1" step="0.01" value="0" />
           </div>
-          <button class="apply-btn" id="apply-material-btn">✓ Áp dụng vật liệu</button>
+          <button class="apply-btn" id="apply-material-btn">Áp dụng vật liệu</button>
         </div>
 
         <!-- Tab: Lights -->
@@ -106,7 +104,7 @@
           <!-- Ambient -->
           <div class="light-card">
             <div class="light-card-header">
-              <span>🌐 Ambient Light</span>
+              <span>Ánh sáng môi trường</span>
               <label class="toggle-switch">
                 <input type="checkbox" id="ambient-toggle" checked />
                 <span class="slider"></span>
@@ -121,7 +119,7 @@
           <!-- Directional -->
           <div class="light-card">
             <div class="light-card-header">
-              <span>☀️ Directional Light</span>
+              <span>Ánh sáng định hướng</span>
               <label class="toggle-switch">
                 <input type="checkbox" id="dir-toggle" checked />
                 <span class="slider"></span>
@@ -140,7 +138,7 @@
           <!-- Point Light -->
           <div class="light-card">
             <div class="light-card-header">
-              <span>💡 Point Light</span>
+              <span>Ánh sáng điểm</span>
               <label class="toggle-switch">
                 <input type="checkbox" id="point-toggle" checked />
                 <span class="slider"></span>
@@ -159,7 +157,7 @@
           <!-- Spot Light -->
           <div class="light-card">
             <div class="light-card-header">
-              <span>🔦 Spot Light</span>
+              <span>Ánh sáng chiếu điểm</span>
               <label class="toggle-switch">
                 <input type="checkbox" id="spot-toggle" checked />
                 <span class="slider"></span>
@@ -182,7 +180,7 @@
 
       <!-- Bottom info bar -->
       <footer id="bottom-bar">
-        <span>🖱️ Kéo để xoay · Scroll để zoom · Click chọn đối tượng</span>
+        <span>Giữ chuột để xoay, cuộn để zoom, click để chọn đối tượng</span>
         <span id="selected-obj">Chưa chọn đối tượng</span>
       </footer>
     </div>
