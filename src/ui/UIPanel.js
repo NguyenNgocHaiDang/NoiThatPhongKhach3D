@@ -250,7 +250,7 @@ export class UIPanel {
     const name = e.detail;
     const selected = document.getElementById('selected-obj');
     if (name) {
-      if (selected) selected.textContent = `📌 ${name}`;
+      if (selected) selected.textContent = `Đang chọn: ${name}`;
       this.#selectObject(name);
     } else {
       if (selected) selected.textContent = 'Chưa chọn đối tượng';
@@ -285,7 +285,7 @@ export class UIPanel {
     if (objSel) objSel.value = name;
 
     const statusText = document.getElementById('selected-obj');
-    if (statusText) statusText.textContent = `📌 ${name}`;
+    if (statusText) statusText.textContent = `Đang chọn: ${name}`;
   }
 
   #clearSelection() {
