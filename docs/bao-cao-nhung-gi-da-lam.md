@@ -26,7 +26,7 @@
   - Kệ gỗ treo tường
   - Ghế đôn gỗ
   - Ghế cao
-- Như vậy, hệ thống đã có từ 10 nhóm đối tượng trở lên để phục vụ thao tác trong cảnh.
+  - còn thiếu 2 nhóm nữa là hoàn thành
 
 ## 4. Vật liệu đã triển khai
 
@@ -44,10 +44,10 @@
 
 - Đã xây dựng nhiều loại ánh sáng trong scene.
 - Các loại ánh sáng hiện có:
-  - Ambient Light
-  - Directional Light
-  - Point Light
-  - Spot Light
+  - Ánh sáng môi trường
+  - Ánh sáng định hướng
+  - Ánh sáng điểm
+  - Ánh sáng chiếu điểm
 - Người dùng có thể bật/tắt đèn, thay đổi cường độ và thay đổi màu ánh sáng trực tiếp trên UI.
 
 ## 6. Tương tác đã triển khai
@@ -72,4 +72,5 @@
 - Đã có file `README.md` hướng dẫn chạy dự án.
 - Đã có script chạy môi trường phát triển.
 - Đã có script build production.
+- Đã triển khai dự án lên `Netlify`.
 - Dự án hiện có thể chạy bằng `npm run dev` và build bằng `npm run build`.
