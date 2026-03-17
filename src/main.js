@@ -18,7 +18,6 @@ class App {
   #uiPanel;
 
   constructor() {
-    console.log('%c [App] Đang khởi tạo ứng dụng... ', 'background: #000; color: #fff');
     this.#init();
   }
 
@@ -59,7 +58,6 @@ class App {
     try {
       await objectManager.load();
     } catch (e) {
-      console.error('Failed to load model:', e);
       this.#setProgress(100, 'Lỗi khi tải mô hình!');
       return;
     }
@@ -104,7 +102,6 @@ class App {
   }
 
   dispose() {
-    console.log('[App] Đang dọn dẹp App cũ...');
     if (this.#requestID) cancelAnimationFrame(this.#requestID);
     if (this._onResize) window.removeEventListener('resize', this._onResize);
 

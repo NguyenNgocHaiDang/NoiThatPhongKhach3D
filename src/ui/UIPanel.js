@@ -76,11 +76,6 @@ export class UIPanel {
       });
     });
 
-    console.log(
-      `%c [UI] Hiển thị ${entries.length} nhóm được định nghĩa (${this.#objectManager.objects.length} mảnh tổng cộng) `,
-      'color: #7c6bff',
-    );
-
     entries.forEach(({ repName, count, color, label }) => {
       const displayName = label;
 
@@ -259,7 +254,6 @@ export class UIPanel {
   };
 
   dispose() {
-    console.log('[UI] Dọn dẹp listener...');
     window.removeEventListener('object-select', this.#onObjectSelect);
     window.removeEventListener('debug-intersects', this.#onDebugIntersects);
   }

@@ -37,13 +37,6 @@ export class Picker {
       const firstHit = intersects[0];
       const obj = this.#objects.find((o) => o.mesh === firstHit.object);
       const name = obj ? obj.name : firstHit.object.name;
-      const label = obj ? obj.label : 'Khác';
-      const { x, y, z } = firstHit.point;
-
-      console.log(
-        `%c[Picker] Hit: ${name} (${label}) at (${x.toFixed(3)}, ${y.toFixed(3)}, ${z.toFixed(3)}) | Dist: ${firstHit.distance.toFixed(4)}`,
-        'color: #00ff00; font-weight: bold',
-      );
 
       // Group hits just for debug-intersects event if needed, but we don't log them anymore
       const hitNames = [
