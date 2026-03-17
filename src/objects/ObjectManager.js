@@ -187,8 +187,6 @@ export class ObjectManager {
       islandData.push({ faces, center: { x: cx.x / n, y: cx.y / n, z: cx.z / n } });
     }
 
-    console.log(`%c[ObjectManager] Splitting mesh into ${islandCount} islands.`, 'color: #ffa500');
-
     // Tách thành mesh riêng
     const attrs = geo.attributes;
     return islandData.map(({ faces }) => {
@@ -318,8 +316,6 @@ export class ObjectManager {
             }
           });
 
-          console.log(`%c Tổng ${this.objects.length} object (sau refactor). `, 'background: #222; color: #00d4aa');
-
           // Đóng băng ma trận cho cảnh tĩnh
           model.updateMatrixWorld(true);
           model.traverse((child) => {
@@ -333,7 +329,6 @@ export class ObjectManager {
         },
         null,
         (err) => {
-          console.error('GLB load error:', err);
           reject(err);
         },
       );
