@@ -1,6 +1,7 @@
 export const PILLOW_GROUP = {
   id: 'pillow_group',
   label: 'Bộ Gối Trang Trí',
+  price: '690.000đ',
   members: [
     'Object_18',
     'Object_19',

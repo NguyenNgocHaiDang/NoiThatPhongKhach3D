@@ -6,10 +6,14 @@ export class UIPanel {
   #objectManager;
   #lightSystem;
   #selectedObject = null;
+  #onFocusGroup;
+  #onResetFocus;
 
-  constructor(objectManager, lightSystem) {
+  constructor(objectManager, lightSystem, { onFocusGroup = null, onResetFocus = null } = {}) {
     this.#objectManager = objectManager;
     this.#lightSystem = lightSystem;
+    this.#onFocusGroup = onFocusGroup;
+    this.#onResetFocus = onResetFocus;
 
     // Seed _matType so in-place update works from first change
     objectManager.objects.forEach((o) => {
@@ -18,11 +22,10 @@ export class UIPanel {
 
     this.#initTabs();
     this.#initPanel();
-    this.#buildLayerList();
+    this.#initLayerFilter();
     this.#initMaterialPanel();
     this.#initLightPanel();
     this.#initObjectSelect();
-    this.#initPicker();
   }
 
   /* ─── Tabs ─────────────────────────────────── */
@@ -50,58 +53,35 @@ export class UIPanel {
     });
   }
 
-  /* ─── Layer list ────────────────────────────── */
-  #buildLayerList() {
-    const list = document.getElementById('layer-list');
-    if (!list) return;
-    list.innerHTML = '';
+  #getGroupEntries() {
+    return this.#objectManager.getGroupEntries();
+  }
 
-    // Gom các object có cùng groupId thành 1 entry
-    const seen = new Set();
-    const entries = [];
+  #initLayerFilter() {
+    const sel = document.getElementById('layer-group-select');
+    if (!sel) return;
 
-    this.#objectManager.objects.forEach((obj) => {
-      if (!obj.groupId) return;
+    sel.innerHTML = '';
 
-      const key = obj.groupId;
-      if (seen.has(key)) return;
-      seen.add(key);
+    const allOpt = document.createElement('option');
+    allOpt.value = '__all__';
+    allOpt.textContent = 'Hiển thị tất cả';
+    sel.appendChild(allOpt);
 
-      const count = this.#objectManager.objects.filter((o) => o.groupId === obj.groupId).length;
-      entries.push({
-        repName: obj.name,
-        color: obj.color,
-        count,
-        label: obj.groupLabel,
-      });
+    this.#getGroupEntries().forEach(({ repName, label }) => {
+      const opt = document.createElement('option');
+      opt.value = repName;
+      opt.textContent = label;
+      sel.appendChild(opt);
     });
 
-    entries.forEach(({ repName, count, color, label }) => {
-      const displayName = label;
+    sel.addEventListener('change', () => {
+      if (sel.value === '__all__') {
+        this.#clearSelection();
+        return;
+      }
 
-      const item = document.createElement('div');
-      item.className = 'layer-item';
-      item.dataset.name = repName;
-      item.innerHTML = `
-        <span class="layer-color" style="background:${color}"></span>
-        <span class="layer-name">${displayName}</span>
-        <button class="layer-toggle" title="Ẩn/Hiện nhóm">👁</button>
-      `;
-
-      let visible = true;
-      item.querySelector('.layer-toggle').addEventListener('click', (e) => {
-        e.stopPropagation();
-        visible = !visible;
-        this.#objectManager.setVisible(repName, visible); // setVisible đã xử lý cả nhóm
-        item.classList.toggle('hidden-obj', !visible);
-      });
-
-      item.addEventListener('click', () => {
-        this.#selectObject(repName);
-        document.querySelector('[data-tab="materials"]')?.click();
-      });
-
-      list.appendChild(item);
+      this.#selectObject(sel.value);
     });
   }
 
@@ -173,16 +153,10 @@ export class UIPanel {
     if (!sel) return;
     sel.innerHTML = ''; // Clear existing options
 
-    const seen = new Set();
-    this.#objectManager.objects.forEach((obj) => {
-      if (!obj.groupId) return;
-      const key = obj.groupId;
-      if (seen.has(key)) return;
-      seen.add(key);
-
+    this.#getGroupEntries().forEach(({ repName, label }) => {
       const opt = document.createElement('option');
-      opt.value = obj.name; // Keep repName as value for Material application
-      opt.textContent = obj.groupLabel;
+      opt.value = repName;
+      opt.textContent = label;
       sel.appendChild(opt);
     });
   }
@@ -235,35 +209,7 @@ export class UIPanel {
     }
   }
 
-  /* ─── Picker ─────────────────────────────────── */
-  #initPicker() {
-    window.addEventListener('object-select', this.#onObjectSelect);
-    window.addEventListener('debug-intersects', this.#onDebugIntersects);
-  }
-
-  #onObjectSelect = (e) => {
-    const name = e.detail;
-    const selected = document.getElementById('selected-obj');
-    if (name) {
-      if (selected) selected.textContent = `Đang chọn: ${name}`;
-      this.#selectObject(name);
-    } else {
-      if (selected) selected.textContent = 'Chưa chọn đối tượng';
-      this.#clearSelection();
-    }
-  };
-
-  dispose() {
-    window.removeEventListener('object-select', this.#onObjectSelect);
-    window.removeEventListener('debug-intersects', this.#onDebugIntersects);
-  }
-
-  #onDebugIntersects = (e) => {
-    const names = e.detail;
-    if (names && names.length > 0) {
-      this.#objectManager.highlightObjects(names, 800);
-    }
-  };
+  dispose() {}
 
   #selectObject(name) {
     this.#selectedObject = name;
@@ -271,19 +217,24 @@ export class UIPanel {
     const targets = this.#objectManager.getGroupObjects(name);
     const repName = targets[0]?.name;
 
-    document.querySelectorAll('.layer-item').forEach((item) => {
-      item.classList.toggle('selected', item.dataset.name === repName);
-    });
+    if (repName) {
+      this.#objectManager.isolateGroup(repName);
+      this.#onFocusGroup?.(repName);
+    }
+
+    const layerSel = document.getElementById('layer-group-select');
+    if (layerSel && repName) layerSel.value = repName;
 
     const objSel = document.getElementById('mat-object-select');
-    if (objSel) objSel.value = name;
-
-    const statusText = document.getElementById('selected-obj');
-    if (statusText) statusText.textContent = `Đang chọn: ${name}`;
+    if (objSel && repName) objSel.value = repName;
   }
 
   #clearSelection() {
     this.#selectedObject = null;
-    document.querySelectorAll('.layer-item').forEach((item) => item.classList.remove('selected'));
+    this.#objectManager.setAllVisible(true);
+    this.#onResetFocus?.();
+
+    const layerSel = document.getElementById('layer-group-select');
+    if (layerSel) layerSel.value = '__all__';
   }
 }

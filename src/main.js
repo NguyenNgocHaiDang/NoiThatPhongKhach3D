@@ -6,16 +6,16 @@ import { OrbitControls } from './controls/OrbitControls.js';
 import { LightSystem } from './lights/LightSystem.js';
 import { ObjectManager } from './objects/ObjectManager.js';
 import { UIPanel } from './ui/UIPanel.js';
+import { PriceLabelSystem } from './ui/PriceLabelSystem.js';
 import { Performance } from './utils/Performance.js';
-import { Picker } from './utils/Picker.js';
 
 class App {
   #requestID;
   #renderer;
   #scene;
   #controls;
-  #picker;
   #uiPanel;
+  #priceLabelSystem;
 
   constructor() {
     this.#init();
@@ -62,12 +62,6 @@ class App {
       return;
     }
 
-    // ── Picker ────────────────────────────────────
-    const allMeshes = objectManager.objects.flatMap((o) =>
-      o.meshes.map((mesh) => ({ mesh, name: o.name, label: o.label })),
-    );
-    this.#picker = new Picker(camera, allMeshes, canvas);
-
     // ── Performance ───────────────────────────────
     const perf = new Performance();
 
@@ -81,7 +75,16 @@ class App {
 
     // ── UI ────────────────────────────────────────
     this.#setProgress(90, 'Khởi tạo giao diện...');
-    this.#uiPanel = new UIPanel(objectManager, lightSystem);
+    this.#uiPanel = new UIPanel(objectManager, lightSystem, {
+      onFocusGroup: (name) => {
+        const center = objectManager.getGroupCenter(name);
+        if (center) this.#controls.focusOn(center);
+      },
+      onResetFocus: () => {
+        this.#controls.resetFocus();
+      },
+    });
+    this.#priceLabelSystem = new PriceLabelSystem(objectManager, camera);
 
     this.#renderer.instance.compile(scene, camera);
 
@@ -95,6 +98,7 @@ class App {
     const tick = () => {
       this.#requestID = requestAnimationFrame(tick);
       this.#controls.update();
+      if (this.#priceLabelSystem) this.#priceLabelSystem.update();
       r.render(scene, camera);
       perf.update(this.#renderer);
     };
@@ -105,8 +109,8 @@ class App {
     if (this.#requestID) cancelAnimationFrame(this.#requestID);
     if (this._onResize) window.removeEventListener('resize', this._onResize);
 
-    if (this.#picker) this.#picker.dispose();
     if (this.#uiPanel) this.#uiPanel.dispose();
+    if (this.#priceLabelSystem) this.#priceLabelSystem.dispose();
 
     if (this.#renderer) {
       this.#renderer.instance.dispose();

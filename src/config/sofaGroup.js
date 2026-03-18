@@ -1,6 +1,7 @@
 export const SOFA_GROUP = {
   id: 'sofa_group',
   label: 'Bộ Ghế Sofa',
+  price: '8.900.000đ',
   members: [
     'Object_1052',
     'Object_1053',

@@ -13,8 +13,6 @@
   --text-primary: #1f1a15;
   --text-secondary: #5b5046;
   --text-muted: #837568;
-  --shadow-soft: 0 16px 40px rgba(44, 33, 22, 0.12);
-  --shadow-card: 0 10px 24px rgba(44, 33, 22, 0.08);
   --radius: 22px;
   --radius-md: 16px;
   --radius-sm: 12px;
@@ -84,7 +82,6 @@ button {
   border-radius: 999px;
   background: rgba(255, 252, 247, 0.7);
   border: 1px solid rgba(61, 49, 38, 0.08);
-  box-shadow: var(--shadow-card);
 }
 
 .loader-text {
@@ -126,7 +123,6 @@ button {
   border-radius: var(--radius);
   background: var(--chrome-bg);
   backdrop-filter: blur(16px);
-  box-shadow: var(--shadow-soft);
 }
 
 .top-bar-left {
@@ -193,7 +189,6 @@ button {
   background:
     linear-gradient(180deg, rgba(255, 252, 247, 0.78), rgba(242, 235, 225, 0.92));
   backdrop-filter: blur(18px);
-  box-shadow: var(--shadow-soft);
   transition: transform var(--transition);
 }
 
@@ -235,7 +230,6 @@ button {
   background: rgba(255, 251, 245, 0.92);
   color: var(--text-secondary);
   cursor: pointer;
-  box-shadow: var(--shadow-card);
   transition:
     right var(--transition),
     background var(--transition),
@@ -285,7 +279,6 @@ body.panel-collapsed #panel-toggle {
 .tab-btn.active {
   color: var(--accent-strong);
   background: rgba(255, 252, 247, 0.92);
-  box-shadow: inset 0 0 0 1px rgba(61, 49, 38, 0.08);
 }
 
 .tab-content {
@@ -358,7 +351,6 @@ body.panel-collapsed #panel-toggle {
 .form-group select:focus {
   outline: none;
   border-color: rgba(91, 109, 77, 0.36);
-  box-shadow: 0 0 0 3px rgba(91, 109, 77, 0.1);
 }
 
 .form-group input[type='range'] {
@@ -379,7 +371,6 @@ body.panel-collapsed #panel-toggle {
   border: 2px solid rgba(255, 255, 255, 0.72);
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 4px 10px rgba(67, 81, 59, 0.18);
 }
 
 .color-row {
@@ -416,7 +407,6 @@ body.panel-collapsed #panel-toggle {
   letter-spacing: 0.03em;
   cursor: pointer;
   transition: var(--transition);
-  box-shadow: 0 12px 22px rgba(67, 81, 59, 0.18);
 }
 
 .apply-btn:hover {
@@ -449,7 +439,6 @@ body.panel-collapsed #panel-toggle {
 .layer-item.selected {
   border-color: rgba(91, 109, 77, 0.34);
   background: rgba(91, 109, 77, 0.1);
-  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .layer-item.hidden-obj {
@@ -537,7 +526,6 @@ body.panel-collapsed #panel-toggle {
   height: 16px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);
   transition: var(--transition);
 }
 
@@ -560,12 +548,46 @@ body.panel-collapsed #panel-toggle {
   color: var(--text-primary);
   font-size: 0.78rem;
   transform: translate(12px, -50%);
-  box-shadow: var(--shadow-card);
   transition: opacity 0.2s;
 }
 
 .tooltip.hidden {
   opacity: 0;
+}
+
+#price-label-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.price-label {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 108px;
+  padding: 10px 12px;
+  border: 1px solid rgba(61, 49, 38, 0.14);
+  border-radius: 14px;
+  background: rgba(255, 250, 241, 0.94);
+  backdrop-filter: blur(12px);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.price-label-name {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.price-label-value {
+  color: var(--accent-strong);
+  font-size: 0.92rem;
+  font-weight: 700;
 }
 
 #bottom-bar {
@@ -583,14 +605,8 @@ body.panel-collapsed #panel-toggle {
   border-radius: var(--radius);
   background: var(--chrome-bg);
   backdrop-filter: blur(16px);
-  box-shadow: var(--shadow-card);
   color: var(--text-secondary);
   font-size: 0.77rem;
-}
-
-#selected-obj {
-  color: var(--accent-strong);
-  font-weight: 600;
 }
 
 @keyframes fadeInUp {

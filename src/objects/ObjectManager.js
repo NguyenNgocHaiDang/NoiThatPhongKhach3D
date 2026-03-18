@@ -11,6 +11,9 @@ export class ObjectManager {
   #model; // Lưu lại model để xóa khi load lại
   #onProgress = null;
   #onLoaded = null;
+  static #TEMP_BOX = new THREE.Box3();
+  static #TEMP_CENTER = new THREE.Vector3();
+  static #TEMP_SIZE = new THREE.Vector3();
   static #IGNORE_GROUPS = [
     'Scene',
     'RootNode',
@@ -342,6 +345,73 @@ export class ObjectManager {
     return this.objects.filter((o) => o.groupId === obj.groupId);
   }
 
+  getGroupEntries() {
+    const seen = new Set();
+    const entries = [];
+
+    this.objects.forEach((obj) => {
+      if (!obj.groupId || seen.has(obj.groupId)) return;
+      seen.add(obj.groupId);
+
+      const groupConfig = UI_GROUPS.find((group) => group.id === obj.groupId);
+      entries.push({
+        groupId: obj.groupId,
+        repName: obj.name,
+        color: obj.color,
+        label: obj.groupLabel,
+        priceLabel: groupConfig?.price ?? null,
+      });
+    });
+
+    return entries;
+  }
+
+  getVisibleGroupEntries() {
+    return this.getGroupEntries().filter(({ repName }) =>
+      this.getGroupObjects(repName).some((obj) => obj.visible),
+    );
+  }
+
+  getGroupAnchor(name) {
+    const targets = this.getGroupObjects(name);
+    if (targets.length === 0) return null;
+
+    const bounds = ObjectManager.#TEMP_BOX;
+    bounds.makeEmpty();
+
+    targets.forEach((obj) => {
+      obj.meshes.forEach((mesh) => {
+        mesh.updateWorldMatrix(true, false);
+        bounds.expandByObject(mesh);
+      });
+    });
+
+    if (bounds.isEmpty()) return null;
+
+    const center = bounds.getCenter(ObjectManager.#TEMP_CENTER).clone();
+    const size = bounds.getSize(ObjectManager.#TEMP_SIZE);
+    center.y = bounds.max.y + Math.max(0.15, size.y * 0.18);
+    return center;
+  }
+
+  getGroupCenter(name) {
+    const targets = this.getGroupObjects(name);
+    if (targets.length === 0) return null;
+
+    const bounds = ObjectManager.#TEMP_BOX;
+    bounds.makeEmpty();
+
+    targets.forEach((obj) => {
+      obj.meshes.forEach((mesh) => {
+        mesh.updateWorldMatrix(true, false);
+        bounds.expandByObject(mesh);
+      });
+    });
+
+    if (bounds.isEmpty()) return null;
+    return bounds.getCenter(ObjectManager.#TEMP_CENTER).clone();
+  }
+
   /**
    * Áp dụng material cho tất cả mảnh trong cùng nhóm
    */
@@ -372,6 +442,28 @@ export class ObjectManager {
     targets.forEach((obj) => {
       obj.visible = visible;
       obj.meshes.forEach((m) => (m.visible = visible));
+    });
+  }
+
+  setAllVisible(visible = true) {
+    this.objects.forEach((obj) => {
+      obj.visible = visible;
+      obj.meshes.forEach((mesh) => {
+        mesh.visible = visible;
+      });
+    });
+  }
+
+  isolateGroup(name) {
+    const targets = this.getGroupObjects(name);
+    const targetGroupId = targets[0]?.groupId;
+
+    this.objects.forEach((obj) => {
+      const visible = Boolean(targetGroupId) && obj.groupId === targetGroupId;
+      obj.visible = visible;
+      obj.meshes.forEach((mesh) => {
+        mesh.visible = visible;
+      });
     });
   }
 

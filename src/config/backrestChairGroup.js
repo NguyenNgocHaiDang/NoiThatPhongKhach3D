@@ -1,6 +1,7 @@
 export const BACKREST_CHAIR_GROUP = {
   id: "backrest_chair_group",
   label: "ghế ngồi có tựa lưng",
+  price: "1.890.000đ",
   members: [
     "Object_26",
     "Object_74",

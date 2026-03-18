@@ -1,6 +1,7 @@
 export const TV_STAND_GROUP = {
   id: 'tv_stand_group',
   label: 'Kệ tivi',
+  price: '3.760.000đ',
   members: [
     'Object_200',
     'Object_201',

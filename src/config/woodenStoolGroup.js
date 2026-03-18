@@ -1,6 +1,7 @@
 export const WOODEN_STOOL_GROUP = {
   id: "wooden_stool_group",
   label: "Ghế đôn gỗ",
+  price: "980.000đ",
   members: [
     "Object_597",
     "Object_598",
