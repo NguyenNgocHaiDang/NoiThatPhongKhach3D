@@ -57,8 +57,13 @@
 
         <!-- Tab: Layers -->
         <div class="tab-content active" id="tab-layers">
-          <div class="section-title">Hiển thị / Ẩn đối tượng</div>
-          <div id="layer-list" class="layer-list"></div>
+          <div class="section-title">Hiển thị vật thể</div>
+          <div class="form-group">
+            <label>Nhóm vật thể</label>
+            <select id="layer-group-select">
+              <option value="__all__">Hiển thị tất cả</option>
+            </select>
+          </div>
         </div>
 
         <!-- Tab: Materials -->
@@ -180,8 +185,7 @@
 
       <!-- Bottom info bar -->
       <footer id="bottom-bar">
-        <span>Giữ chuột để xoay, cuộn để zoom, click để chọn đối tượng</span>
-        <span id="selected-obj">Chưa chọn đối tượng</span>
+        <span>Giữ chuột để xoay và cuộn để zoom cảnh</span>
       </footer>
     </div>
     <script type="module" src="/src/main.js"></script>

@@ -8,6 +8,8 @@ import { DECORATIVE_WOOD_AND_STONE_GROUP } from "./decorativeWoodAndStoneGroup.j
 import { WOODEN_WALL_SHELF_GROUP } from "./woodenWallShelfGroup.js";
 import { WOODEN_STOOL_GROUP } from "./woodenStoolGroup.js";
 import { BAR_STOOL_GROUP } from "./barStoolGroup.js";
+import { WOODEN_TABLE_GROUP } from "./woodenTable.js";
+import { FREESTANDING_SHELF_GROUP } from "./freestandingShelf.js";
 
 export const UI_GROUPS = [
   SOFA_GROUP,
@@ -20,4 +22,6 @@ export const UI_GROUPS = [
   WOODEN_WALL_SHELF_GROUP,
   WOODEN_STOOL_GROUP,
   BAR_STOOL_GROUP,
+  WOODEN_TABLE_GROUP,
+  FREESTANDING_SHELF_GROUP,
 ];

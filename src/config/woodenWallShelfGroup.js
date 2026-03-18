@@ -1,6 +1,7 @@
 export const WOODEN_WALL_SHELF_GROUP = {
   id: "wooden_wall_shelf_group",
   label: "Kệ gỗ treo tường",
+  price: "1.120.000đ",
   members: [
     "Object_1498",
     "Object_1499",

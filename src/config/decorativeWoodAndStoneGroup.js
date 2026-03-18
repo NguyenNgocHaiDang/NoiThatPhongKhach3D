@@ -1,6 +1,7 @@
 export const DECORATIVE_WOOD_AND_STONE_GROUP = {
   id: "decorative_wood_and_stone_group",
   label: "Gỗ Và Đá Trang Trí",
+  price: "540.000đ",
   members: [
     "Object_1",
     "Object_2",

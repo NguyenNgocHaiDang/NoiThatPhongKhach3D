@@ -1,6 +1,7 @@
 export const LAMP_GROUP = {
   id: 'lamp_group',
   label: 'Đèn Cây',
+  price: '1.480.000đ',
   members: [
     'Object_9',
     'Object_10',

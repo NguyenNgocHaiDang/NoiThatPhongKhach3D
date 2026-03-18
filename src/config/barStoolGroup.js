@@ -1,6 +1,7 @@
 export const BAR_STOOL_GROUP = {
   id: "bar_stool_group",
   label: "ghế cao",
+  price: "1.250.000đ",
   members: [
     "Object_632",
     "Object_633",
