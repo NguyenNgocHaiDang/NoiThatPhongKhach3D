@@ -32,4 +32,8 @@ export class OrbitControls {
   update() {
     this.instance.update();
   }
+
+  setEnabled(enabled) {
+    this.instance.enabled = enabled;
+  }
 }
