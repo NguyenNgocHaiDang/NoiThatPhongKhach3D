@@ -5,7 +5,6 @@
 export class UIPanel {
   #objectManager;
   #lightSystem;
-  #selectedObject = null;
   #onFocusGroup;
   #onResetFocus;
 
@@ -22,7 +21,6 @@ export class UIPanel {
 
     this.#initTabs();
     this.#initPanel();
-    this.#initLayerFilter();
     this.#initMaterialPanel();
     this.#initLightPanel();
     this.#initObjectSelect();
@@ -55,34 +53,6 @@ export class UIPanel {
 
   #getGroupEntries() {
     return this.#objectManager.getGroupEntries();
-  }
-
-  #initLayerFilter() {
-    const sel = document.getElementById('layer-group-select');
-    if (!sel) return;
-
-    sel.innerHTML = '';
-
-    const allOpt = document.createElement('option');
-    allOpt.value = '__all__';
-    allOpt.textContent = 'Hiển thị tất cả';
-    sel.appendChild(allOpt);
-
-    this.#getGroupEntries().forEach(({ repName, label }) => {
-      const opt = document.createElement('option');
-      opt.value = repName;
-      opt.textContent = label;
-      sel.appendChild(opt);
-    });
-
-    sel.addEventListener('change', () => {
-      if (sel.value === '__all__') {
-        this.#clearSelection();
-        return;
-      }
-
-      this.#selectObject(sel.value);
-    });
   }
 
   /* ─── Material Panel ────────────────────────── */
@@ -210,31 +180,4 @@ export class UIPanel {
   }
 
   dispose() {}
-
-  #selectObject(name) {
-    this.#selectedObject = name;
-
-    const targets = this.#objectManager.getGroupObjects(name);
-    const repName = targets[0]?.name;
-
-    if (repName) {
-      this.#objectManager.isolateGroup(repName);
-      this.#onFocusGroup?.(repName);
-    }
-
-    const layerSel = document.getElementById('layer-group-select');
-    if (layerSel && repName) layerSel.value = repName;
-
-    const objSel = document.getElementById('mat-object-select');
-    if (objSel && repName) objSel.value = repName;
-  }
-
-  #clearSelection() {
-    this.#selectedObject = null;
-    this.#objectManager.setAllVisible(true);
-    this.#onResetFocus?.();
-
-    const layerSel = document.getElementById('layer-group-select');
-    if (layerSel) layerSel.value = '__all__';
-  }
 }

@@ -96,6 +96,13 @@ export class ObjectManager {
       maxMargin: 0.035,
       useCenterDistance: false,
     },
+    books_group: {
+      label: 'Sách',
+      marginScale: 0.015,
+      minMargin: 0.004,
+      maxMargin: 0.018,
+      useCenterDistance: false,
+    },
     backrest_chair_group: {
       label: 'Ghế Có Tựa Lưng',
       marginScale: 0.04,

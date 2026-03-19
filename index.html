@@ -57,14 +57,6 @@
 
         <!-- Tab: Layers -->
         <div class="tab-content active" id="tab-layers">
-          <div class="section-title">Hiển thị vật thể</div>
-          <div class="form-group">
-            <label>Nhóm vật thể</label>
-            <select id="layer-group-select">
-              <option value="__all__">Hiển thị tất cả</option>
-            </select>
-          </div>
-
           <div class="section-title">Sắp xếp bố cục</div>
           <div class="light-card layout-card">
             <div class="light-card-header">
@@ -83,12 +75,6 @@
               <div class="layout-controlled-list" id="layout-controlled-list"></div>
             </div>
             <div class="form-group">
-              <label>Vật thể cần sắp xếp</label>
-              <select id="layout-object-select">
-                <option value="">Chọn vật thể để sắp xếp</option>
-              </select>
-            </div>
-            <div class="form-group">
               <label>Góc xoay: <span id="layout-rotation-value">0°</span></label>
               <input type="range" id="layout-rotation" min="-180" max="180" step="5" value="0" disabled />
             </div>
@@ -96,11 +82,8 @@
               <button class="apply-btn secondary-btn" id="rotate-left-btn" disabled>Xoay trái</button>
               <button class="apply-btn secondary-btn" id="rotate-right-btn" disabled>Xoay phải</button>
             </div>
-            <p class="layout-note" id="layout-status">
-              Bật chế độ kéo thả để chọn đồ nội thất và tự sắp xếp vị trí.
-            </p>
             <div class="layout-actions">
-              <button class="apply-btn secondary-btn" id="reset-layout-btn" disabled>Đặt lại vật thể đã chọn</button>
+              <button class="apply-btn secondary-btn" id="reset-layout-btn" disabled>Đặt lại vật đã chọn</button>
               <button class="apply-btn secondary-btn" id="reset-all-layout-btn">Đặt lại toàn bộ bố cục</button>
             </div>
           </div>
