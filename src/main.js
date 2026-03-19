@@ -8,6 +8,7 @@ import { ObjectManager } from './objects/ObjectManager.js';
 import { UIPanel } from './ui/UIPanel.js';
 import { PriceLabelSystem } from './ui/PriceLabelSystem.js';
 import { Performance } from './utils/Performance.js';
+import { LayoutDesigner } from './interactions/LayoutDesigner.js';
 
 class App {
   #requestID;
@@ -16,6 +17,7 @@ class App {
   #controls;
   #uiPanel;
   #priceLabelSystem;
+  #layoutDesigner;
 
   constructor() {
     this.#init();
@@ -85,6 +87,7 @@ class App {
       },
     });
     this.#priceLabelSystem = new PriceLabelSystem(objectManager, camera);
+    this.#layoutDesigner = new LayoutDesigner(camera, canvas, objectManager, this.#controls);
 
     this.#renderer.instance.compile(scene, camera);
 
@@ -111,6 +114,7 @@ class App {
 
     if (this.#uiPanel) this.#uiPanel.dispose();
     if (this.#priceLabelSystem) this.#priceLabelSystem.dispose();
+    if (this.#layoutDesigner) this.#layoutDesigner.dispose();
 
     if (this.#renderer) {
       this.#renderer.instance.dispose();

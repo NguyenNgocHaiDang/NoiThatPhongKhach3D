@@ -11,6 +11,9 @@ export class ObjectManager {
   #model; // Lưu lại model để xóa khi load lại
   #onProgress = null;
   #onLoaded = null;
+  #groupContainers = new Map();
+  #selectedGroupName = null;
+  #sceneFloorY = 0;
   static #TEMP_BOX = new THREE.Box3();
   static #TEMP_CENTER = new THREE.Vector3();
   static #TEMP_SIZE = new THREE.Vector3();
@@ -78,6 +81,30 @@ export class ObjectManager {
     // ... các màu khác
   };
 
+  static #LAYOUT_CLUSTER_RULES = {
+    sofa_group: {
+      label: 'Ghế Sofa',
+      marginScale: 0.06,
+      minMargin: 0.03,
+      maxMargin: 0.12,
+      useCenterDistance: false,
+    },
+    pillow_group: {
+      label: 'Gối Trang Trí',
+      marginScale: 0.025,
+      minMargin: 0.008,
+      maxMargin: 0.035,
+      useCenterDistance: false,
+    },
+    backrest_chair_group: {
+      label: 'Ghế Có Tựa Lưng',
+      marginScale: 0.04,
+      minMargin: 0.015,
+      maxMargin: 0.06,
+      useCenterDistance: false,
+    },
+  };
+
   /**
    * Array lồng nhau để phân nhóm thủ công theo ID (Object_N).
    * Hỗ trợ cả ID đơn lẻ và dải ID (VD: 'Object_10-20').
@@ -124,6 +151,178 @@ export class ObjectManager {
     this.#scene = scene;
     this.#onProgress = onProgress;
     this.#onLoaded = onLoaded;
+  }
+
+  #getLayoutObjects(name) {
+    const layoutGroup = this.#groupContainers.get(name);
+    if (!layoutGroup) return [];
+    return layoutGroup.objectNames
+      .map((objectName) => this.objects.find((obj) => obj.name === objectName))
+      .filter(Boolean);
+  }
+
+  #getObjectBounds(objectEntry) {
+    const bounds = new THREE.Box3().makeEmpty();
+    objectEntry.meshes.forEach((mesh) => {
+      mesh.updateWorldMatrix(true, false);
+      bounds.expandByObject(mesh);
+    });
+    return bounds;
+  }
+
+  #getTargetsBounds(targets) {
+    const bounds = new THREE.Box3().makeEmpty();
+    targets.forEach((target) => {
+      target.meshes.forEach((mesh) => {
+        mesh.updateWorldMatrix(true, false);
+        bounds.expandByObject(mesh);
+      });
+    });
+    return bounds;
+  }
+
+  #groupObjectsForLayout(groupId, baseLabel, targets) {
+    const layoutRule = ObjectManager.#LAYOUT_CLUSTER_RULES[groupId] ?? {};
+    const clusterLabel = layoutRule.label ?? baseLabel;
+
+    if (targets.length <= 1) {
+      return [
+        {
+          label: clusterLabel,
+          objectNames: targets.map((obj) => obj.name),
+          targets,
+        },
+      ];
+    }
+
+    const parents = new Array(targets.length).fill(null).map((_, index) => index);
+    const find = (index) => {
+      let current = index;
+      while (parents[current] !== current) {
+        parents[current] = parents[parents[current]];
+        current = parents[current];
+      }
+      return current;
+    };
+    const union = (a, b) => {
+      const rootA = find(a);
+      const rootB = find(b);
+      if (rootA !== rootB) parents[rootB] = rootA;
+    };
+
+    const objectData = targets.map((target) => {
+      const bounds = this.#getObjectBounds(target);
+      const size = bounds.getSize(new THREE.Vector3());
+      const diagonal = size.length();
+      const margin = Math.min(
+        Math.max(diagonal * (layoutRule.marginScale ?? 0.18), layoutRule.minMargin ?? 0.08),
+        layoutRule.maxMargin ?? 0.35,
+      );
+      const expandedBounds = bounds.clone().expandByScalar(margin);
+      const center = bounds.getCenter(new THREE.Vector3());
+
+      return { target, bounds, expandedBounds, center };
+    });
+
+    for (let i = 0; i < objectData.length; i++) {
+      for (let j = i + 1; j < objectData.length; j++) {
+        const current = objectData[i];
+        const next = objectData[j];
+
+        const intersects = current.expandedBounds.intersectsBox(next.expandedBounds);
+        const centerDistance = current.center.distanceTo(next.center);
+        const dynamicThreshold = Math.max(
+          0.18,
+          Math.min(current.bounds.getSize(new THREE.Vector3()).length(), next.bounds.getSize(new THREE.Vector3()).length()) *
+            1.25,
+        );
+
+        const closeByCenter = layoutRule.useCenterDistance === false ? false : centerDistance <= dynamicThreshold;
+
+        if (intersects || closeByCenter) {
+          union(i, j);
+        }
+      }
+    }
+
+    const clusters = new Map();
+    objectData.forEach((entry, index) => {
+      const root = find(index);
+      if (!clusters.has(root)) clusters.set(root, []);
+      clusters.get(root).push(entry);
+    });
+
+    const sortedClusters = [...clusters.values()].sort((a, b) => {
+      const centerA = a
+        .reduce((sum, item) => sum.add(item.center), new THREE.Vector3())
+        .multiplyScalar(1 / a.length);
+      const centerB = b
+        .reduce((sum, item) => sum.add(item.center), new THREE.Vector3())
+        .multiplyScalar(1 / b.length);
+
+      if (Math.abs(centerA.z - centerB.z) > 0.25) return centerA.z - centerB.z;
+      return centerA.x - centerB.x;
+    });
+
+    return sortedClusters.map((cluster, index) => ({
+      label: sortedClusters.length > 1 ? `${clusterLabel} ${index + 1}` : clusterLabel,
+      objectNames: cluster.map(({ target }) => target.name),
+      targets: cluster.map(({ target }) => target),
+    }));
+  }
+
+  #clearLayoutGroups() {
+    this.#selectedGroupName = null;
+    this.#sceneFloorY = 0;
+    this.#groupContainers.forEach(({ container }) => {
+      this.#scene.remove(container);
+    });
+    this.#groupContainers.clear();
+  }
+
+  #setupMovableGroups() {
+    this.#groupContainers.clear();
+
+    this.getGroupEntries().forEach(({ groupId, repName, label }) => {
+      const targets = this.getGroupObjects(repName);
+      const layoutClusters = this.#groupObjectsForLayout(groupId, label, targets);
+
+      layoutClusters.forEach((cluster, index) => {
+        const layoutName = `${groupId}__layout_${index + 1}`;
+        const container = new THREE.Group();
+        container.name = `LayoutGroup_${layoutName}`;
+        container.userData.layoutGroupName = layoutName;
+        container.userData.layoutGroupId = groupId;
+        container.userData.layoutGroupLabel = cluster.label;
+
+        const clusterBounds = this.#getTargetsBounds(cluster.targets);
+        const pivot = clusterBounds.getCenter(new THREE.Vector3());
+        container.position.copy(pivot);
+
+        this.#scene.add(container);
+        container.updateMatrixWorld(true);
+
+        cluster.targets.forEach((obj) => {
+          obj.meshes.forEach((mesh) => {
+            mesh.userData.layoutGroupName = layoutName;
+            mesh.userData.layoutGroupId = groupId;
+            container.attach(mesh);
+          });
+        });
+
+        this.#groupContainers.set(layoutName, {
+          groupId,
+          sourceGroupName: repName,
+          label: cluster.label,
+          objectNames: cluster.objectNames,
+          container,
+          initialPosition: container.position.clone(),
+          initialRotation: container.rotation.clone(),
+        });
+      });
+    });
+
+    this.#scene.updateMatrixWorld(true);
   }
 
   /**
@@ -232,6 +431,8 @@ export class ObjectManager {
   }
 
   async load() {
+    this.#clearLayoutGroups();
+
     if (this.#model) {
       this.#scene.remove(this.#model);
       this.#model = null;
@@ -292,6 +493,8 @@ export class ObjectManager {
               node.castShadow = false;
               node.receiveShadow = false;
               node.frustumCulled = true;
+              node.updateMatrix();
+              node.matrixAutoUpdate = false;
 
               const oldMat = node.material;
               const lambertMat = new THREE.MeshLambertMaterial().copy(oldMat);
@@ -319,13 +522,17 @@ export class ObjectManager {
             }
           });
 
-          // Đóng băng ma trận cho cảnh tĩnh
+          this.#scene.add(model);
           model.updateMatrixWorld(true);
+          this.#sceneFloorY = new THREE.Box3().setFromObject(model).min.y;
+          this.#setupMovableGroups();
+
+          // Đóng băng phần còn lại của cảnh sau khi đã tách các nhóm có thể di chuyển
           model.traverse((child) => {
+            child.updateMatrix();
             child.matrixAutoUpdate = false;
           });
 
-          this.#scene.add(model);
           dracoLoader.dispose();
           if (this.#onLoaded) this.#onLoaded();
           resolve();
@@ -370,6 +577,131 @@ export class ObjectManager {
     return this.getGroupEntries().filter(({ repName }) =>
       this.getGroupObjects(repName).some((obj) => obj.visible),
     );
+  }
+
+  getDraggableEntries() {
+    return [...this.#groupContainers.entries()].map(([repName, entry]) => ({
+      groupId: entry.groupId,
+      repName,
+      color: '#888',
+      label: entry.label,
+      sourceGroupName: entry.sourceGroupName,
+    }));
+  }
+
+  getDraggableMeshes() {
+    return [...this.#groupContainers.values()].flatMap(({ objectNames }) =>
+      objectNames.flatMap((objectName) => {
+        const obj = this.objects.find((entry) => entry.name === objectName);
+        if (!obj || !obj.visible) return [];
+        return obj.meshes.filter((mesh) => mesh.visible);
+      }),
+    );
+  }
+
+  getPlacementMeshes(excludeName = null) {
+    const excludedNames = excludeName ? new Set(this.#groupContainers.get(excludeName)?.objectNames ?? []) : null;
+
+    return this.objects.flatMap((obj) => {
+      if (!obj.visible) return [];
+      if (excludedNames?.has(obj.name)) return [];
+      return obj.meshes.filter((mesh) => mesh.visible);
+    });
+  }
+
+  getGroupNameFromMesh(mesh) {
+    let current = mesh;
+    while (current) {
+      if (current.userData?.layoutGroupName) return current.userData.layoutGroupName;
+      current = current.parent;
+    }
+    return null;
+  }
+
+  getGroupPosition(name) {
+    const container = this.#groupContainers.get(name)?.container;
+    return container ? container.position.clone() : null;
+  }
+
+  getSceneFloorY() {
+    return this.#sceneFloorY;
+  }
+
+  setLayoutGroupVisible(name, visible) {
+    const layoutGroup = this.#groupContainers.get(name);
+    if (!layoutGroup) return;
+
+    layoutGroup.objectNames.forEach((objectName) => {
+      const obj = this.objects.find((entry) => entry.name === objectName);
+      if (!obj) return;
+      obj.visible = visible;
+      obj.meshes.forEach((mesh) => {
+        mesh.visible = visible;
+      });
+    });
+  }
+
+  setLayoutVisibility(enabledNames) {
+    const enabledSet = enabledNames instanceof Set ? enabledNames : new Set(enabledNames);
+    this.#groupContainers.forEach((_, layoutName) => {
+      this.setLayoutGroupVisible(layoutName, enabledSet.has(layoutName));
+    });
+  }
+
+  showAllLayoutGroups() {
+    this.#groupContainers.forEach((_, layoutName) => {
+      this.setLayoutGroupVisible(layoutName, true);
+    });
+  }
+
+  getGroupBounds(name) {
+    const targets = this.#getLayoutObjects(name);
+    if (targets.length === 0) return null;
+
+    const bounds = new THREE.Box3().makeEmpty();
+    targets.forEach((obj) => {
+      obj.meshes.forEach((mesh) => {
+        mesh.updateWorldMatrix(true, false);
+        bounds.expandByObject(mesh);
+      });
+    });
+
+    return bounds.isEmpty() ? null : bounds.clone();
+  }
+
+  setGroupPosition(name, position) {
+    const container = this.#groupContainers.get(name)?.container;
+    if (!container) return;
+    container.position.copy(position);
+    container.updateMatrixWorld(true);
+  }
+
+  resetGroupPosition(name) {
+    const groupState = this.#groupContainers.get(name);
+    if (!groupState) return;
+    groupState.container.position.copy(groupState.initialPosition);
+    groupState.container.rotation.copy(groupState.initialRotation);
+    groupState.container.updateMatrixWorld(true);
+  }
+
+  resetAllGroupPositions() {
+    this.#groupContainers.forEach(({ container, initialPosition, initialRotation }) => {
+      container.position.copy(initialPosition);
+      container.rotation.copy(initialRotation);
+      container.updateMatrixWorld(true);
+    });
+  }
+
+  getGroupRotationY(name) {
+    const container = this.#groupContainers.get(name)?.container;
+    return container ? container.rotation.y : 0;
+  }
+
+  setGroupRotationY(name, radians) {
+    const container = this.#groupContainers.get(name)?.container;
+    if (!container) return;
+    container.rotation.y = radians;
+    container.updateMatrixWorld(true);
   }
 
   getGroupAnchor(name) {
@@ -490,5 +822,48 @@ export class ObjectManager {
         });
       });
     });
+  }
+
+  clearSelectionHighlight() {
+    if (!this.#selectedGroupName) return;
+
+    const targets = this.#getLayoutObjects(this.#selectedGroupName);
+    targets.forEach((obj) => {
+      obj.meshes.forEach((mesh) => {
+        if (!mesh.material?.emissive) return;
+        if (mesh.userData.layoutOrigEmissive) {
+          mesh.material.emissive.copy(mesh.userData.layoutOrigEmissive);
+        }
+        mesh.material.emissiveIntensity = mesh.userData.layoutOrigEmissiveIntensity ?? 0;
+        mesh.material.needsUpdate = true;
+      });
+    });
+
+    this.#selectedGroupName = null;
+  }
+
+  setSelectionHighlight(name) {
+    if (this.#selectedGroupName === name) return;
+
+    this.clearSelectionHighlight();
+    if (!name) return;
+
+    const targets = this.#getLayoutObjects(name);
+    targets.forEach((obj) => {
+      obj.meshes.forEach((mesh) => {
+        if (!mesh.material?.emissive) return;
+        if (!mesh.userData.layoutOrigEmissive) {
+          mesh.userData.layoutOrigEmissive = mesh.material.emissive.clone();
+        }
+        if (mesh.userData.layoutOrigEmissiveIntensity === undefined) {
+          mesh.userData.layoutOrigEmissiveIntensity = mesh.material.emissiveIntensity ?? 0;
+        }
+        mesh.material.emissive.set('#b77332');
+        mesh.material.emissiveIntensity = 0.35;
+        mesh.material.needsUpdate = true;
+      });
+    });
+
+    this.#selectedGroupName = name;
   }
 }
