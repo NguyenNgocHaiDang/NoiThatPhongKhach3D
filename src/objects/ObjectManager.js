@@ -2,18 +2,22 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { MaterialLibrary } from '../materials/MaterialLibrary.js';
-import { UI_GROUPS } from '../config/uiGroups.js';
 
 export class ObjectManager {
   objects = []; // Danh sách các nhóm vật thể (Sofa, Sàn, Tường...)
 
   #scene;
+  #sceneConfig;
   #model; // Lưu lại model để xóa khi load lại
   #onProgress = null;
   #onLoaded = null;
   #groupContainers = new Map();
   #selectedGroupName = null;
   #sceneFloorY = 0;
+  #uiGroups = [];
+  #materialNames = {};
+  #groupColors = {};
+  #layoutClusterRules = {};
   static #TEMP_BOX = new THREE.Box3();
   static #TEMP_CENTER = new THREE.Vector3();
   static #TEMP_SIZE = new THREE.Vector3();
@@ -28,90 +32,6 @@ export class ObjectManager {
     'Scene_Root',
   ];
 
-  // Giữ nguyên các map tên cũ của bạn
-  static #NODE_NAMES = [
-    { pattern: 'Burnt_Log', name: 'Khúc gỗ trang trí' },
-    { pattern: 'Patterned_Floor', name: 'Sàn nhà' },
-    { pattern: 'Studded_Leather', name: 'Bọc da sofa' },
-    { pattern: 'Wooden_Bowl', name: 'Bát gỗ trang trí' },
-    { pattern: 'Lamp_', name: 'Đèn cây' },
-    { pattern: 'Plywood', name: 'Kệ tivi/làm việc' },
-    { pattern: 'Book', name: 'Sách gỗ/Kệ' },
-    { pattern: 'Solid_Wood', name: 'Sofa gỗ/Chân' },
-    { pattern: 'Wooden_Beam', name: 'Gờ gỗ/Khung' },
-    { pattern: 'Wood_Pattern', name: 'Gỗ ghép' },
-    { pattern: 'Small_Rocks', name: 'Chậu cây' },
-    { pattern: 'Plastic_Matte', name: 'Chi tiết nhựa' },
-    { pattern: 'Mat', name: 'Các loại chân/viền khác' },
-  ];
-
-  static #MATERIAL_NAMES = {
-    Burnt_Log_vcsaeeyfa: 'Khúc gỗ trang trí',
-    Patterned_Floor_tksmdiycw: 'Sàn nhà',
-    Studded_Leather_tlooadar: 'Bọc da sofa',
-    'Wooden_Bowl_tfpcbhnra.1': 'Bát gỗ trang trí',
-    material: 'Đèn cây',
-    'Mat.1': 'Đệm ngồi',
-    'Mat.2': 'Bàn trà',
-    'Mat.3': 'Gối vuông',
-    'Mat.4': 'Thảm',
-    'Mat.4_1': 'Ngăn kéo gỗ',
-    // Tắt nhóm config
-    // static FURNITURE_GROUPS = {};
-    'Mat.5': 'Tường',
-    'Mat.6': 'Cửa nhôm/kính',
-    'Plywood_vdcjfiw.1': 'Ghế bành gỗ',
-    'Plywood_vdcjfiw.1_1': 'Kệ sách gỗ',
-    Small_Rocks_ulludayiw: 'Chậu cây',
-    White_And_Blue_vdkvbea: 'Gối trang trí',
-    Wooden_Beam_tgngdibfa: 'Kệ treo',
-    Wooden_Beam_tgnhde0fa: 'Kệ TV',
-    Mat_1: 'Vật nhỏ khác',
-    Brown_Book_vgbkedfjw: 'Sách',
-  };
-
-  static #GROUP_COLORS = {
-    Sách: '#654321',
-    'Khúc gỗ trang trí': '#5C4033',
-    'Đèn cây': '#FFD700',
-    'Đệm ngồi': '#333333',
-    'Bàn trà': '#8B7355',
-    'Sàn nhà': '#3a3a3a',
-    'Bọc da sofa': '#1a1a1a',
-    // ... các màu khác
-  };
-
-  static #LAYOUT_CLUSTER_RULES = {
-    sofa_group: {
-      label: 'Ghế Sofa',
-      marginScale: 0.06,
-      minMargin: 0.03,
-      maxMargin: 0.12,
-      useCenterDistance: false,
-    },
-    pillow_group: {
-      label: 'Gối Trang Trí',
-      marginScale: 0.025,
-      minMargin: 0.008,
-      maxMargin: 0.035,
-      useCenterDistance: false,
-    },
-    books_group: {
-      label: 'Sách',
-      marginScale: 0.015,
-      minMargin: 0.004,
-      maxMargin: 0.018,
-      useCenterDistance: false,
-    },
-    backrest_chair_group: {
-      label: 'Ghế Có Tựa Lưng',
-      marginScale: 0.04,
-      minMargin: 0.015,
-      maxMargin: 0.06,
-      useCenterDistance: false,
-    },
-  };
-
   /**
    * Array lồng nhau để phân nhóm thủ công theo ID (Object_N).
    * Hỗ trợ cả ID đơn lẻ và dải ID (VD: 'Object_10-20').
@@ -123,13 +43,87 @@ export class ObjectManager {
     return match ? Number(match[1]) : null;
   }
 
-  /** Kiểm tra xem một object có thuộc group cấu hình thủ công hay không */
-  static #getManualGroupId(...candidateNames) {
+  static #toLabel(value) {
+    return value
+      ?.replace(/_/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim() || 'Khac';
+  }
+
+  static #normalizeName(value) {
+    return String(value ?? '')
+      .trim()
+      .replace(/_/g, ' ')
+      .replace(/\s+/g, ' ')
+      .toLowerCase();
+  }
+
+  static #extractBaseName(value) {
+    const raw = String(value ?? '').trim();
+    if (!raw) return '';
+
+    return raw
+      .replace(/_Material(?:\.[^_]+)?_\d+$/i, '')
+      .replace(/_Material\d+_\d+$/i, '')
+      .replace(/_Material\d+$/i, '')
+      .replace(/_Material(?:\.[^_]+)?$/i, '')
+      .replace(/_/g, ' ')
+      .trim();
+  }
+
+  #lookupMappedName(map, ...candidateNames) {
     for (const candidateName of candidateNames) {
-      for (const group of UI_GROUPS) {
+      if (candidateName && map[candidateName] !== undefined) {
+        return map[candidateName];
+      }
+    }
+
+    const normalizedCandidates = candidateNames
+      .map((candidateName) => ObjectManager.#normalizeName(candidateName))
+      .filter(Boolean);
+
+    if (normalizedCandidates.length === 0) return undefined;
+
+    const matchedEntry = Object.entries(map).find(([key]) =>
+      normalizedCandidates.includes(ObjectManager.#normalizeName(key)),
+    );
+
+    return matchedEntry?.[1];
+  }
+
+  /** Kiểm tra xem một object có thuộc group cấu hình thủ công hay không */
+  #getManualGroupId(...candidateNames) {
+    const expandedCandidates = new Set();
+
+    candidateNames.forEach((candidateName) => {
+      if (!candidateName || typeof candidateName !== 'string') return;
+      expandedCandidates.add(candidateName);
+
+      const baseName = ObjectManager.#extractBaseName(candidateName);
+      if (baseName) expandedCandidates.add(baseName);
+    });
+
+    const normalizedCandidates = new Set(
+      [...expandedCandidates]
+        .map((candidateName) => ObjectManager.#normalizeName(candidateName))
+        .filter(Boolean),
+    );
+
+    for (const candidateName of candidateNames) {
+      for (const group of this.#uiGroups) {
         if (group.members.includes(candidateName)) {
           return group.id;
         }
+      }
+    }
+
+    for (const group of this.#uiGroups) {
+      const hasNormalizedMatch = group.members.some((member) =>
+        normalizedCandidates.has(ObjectManager.#normalizeName(member)),
+      );
+
+      if (hasNormalizedMatch) {
+        return group.id;
       }
     }
 
@@ -137,7 +131,7 @@ export class ObjectManager {
       .map((name) => ObjectManager.#parseObjectNumber(name))
       .filter((num) => num !== null);
 
-    for (const group of UI_GROUPS) {
+    for (const group of this.#uiGroups) {
       for (const m of group.members) {
         if (candidateNames.includes(m)) {
           return group.id;
@@ -154,10 +148,26 @@ export class ObjectManager {
     return null;
   }
 
-  constructor(scene, { onProgress, onLoaded } = {}) {
+  #getGroupConfig(groupId) {
+    return this.#uiGroups.find((group) => group.id === groupId) ?? null;
+  }
+
+  #getObjectLabel(matName, sourceName, sourceGroupName) {
+    return (
+      this.#lookupMappedName(this.#materialNames, sourceGroupName, sourceName, matName) ??
+      ObjectManager.#toLabel(sourceGroupName || sourceName || matName)
+    );
+  }
+
+  constructor(scene, sceneConfig, { onProgress, onLoaded } = {}) {
     this.#scene = scene;
+    this.#sceneConfig = sceneConfig;
     this.#onProgress = onProgress;
     this.#onLoaded = onLoaded;
+    this.#uiGroups = sceneConfig?.uiGroups ?? [];
+    this.#materialNames = sceneConfig?.materialNames ?? {};
+    this.#groupColors = sceneConfig?.groupColors ?? {};
+    this.#layoutClusterRules = sceneConfig?.layoutClusterRules ?? {};
   }
 
   #getLayoutObjects(name) {
@@ -189,7 +199,7 @@ export class ObjectManager {
   }
 
   #groupObjectsForLayout(groupId, baseLabel, targets) {
-    const layoutRule = ObjectManager.#LAYOUT_CLUSTER_RULES[groupId] ?? {};
+    const layoutRule = this.#layoutClusterRules[groupId] ?? {};
     const clusterLabel = layoutRule.label ?? baseLabel;
 
     if (targets.length <= 1) {
@@ -447,14 +457,15 @@ export class ObjectManager {
     this.objects = [];
 
     const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
-
     const loader = new GLTFLoader();
-    loader.setDRACOLoader(dracoLoader);
+    if (this.#sceneConfig?.useDraco) {
+      dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
+      loader.setDRACOLoader(dracoLoader);
+    }
 
     return new Promise((resolve, reject) => {
       loader.load(
-        '/model/living_room/scene_opt.glb',
+        this.#sceneConfig.modelPath,
         (gltf) => {
           const model = gltf.scene;
           this.#model = model;
@@ -510,18 +521,20 @@ export class ObjectManager {
               node.__origMaterial = node.material.clone();
 
               const matName = oldMat.name || '';
-              const vietName = ObjectManager.#MATERIAL_NAMES[matName] || 'Khác';
               const sourceName = node.__origName || uniqueName;
-              let groupId = ObjectManager.#getManualGroupId(uniqueName, sourceName);
-              let groupLabel = UI_GROUPS.find((g) => g.id === groupId)?.label || vietName;
+              const sourceGroupName = node.parent?.__origName || sourceName;
+              const objectLabel = this.#getObjectLabel(matName, sourceName, sourceGroupName);
+              const groupId = this.#getManualGroupId(uniqueName, sourceName, sourceGroupName, matName);
+              const groupLabel = this.#getGroupConfig(groupId)?.label || objectLabel;
 
               this.objects.push({
                 name: uniqueName,
                 sourceName,
-                label: vietName,
+                sourceGroupName,
+                label: objectLabel,
                 groupId,
                 groupLabel,
-                color: ObjectManager.#GROUP_COLORS[vietName] ?? '#888',
+                color: this.#groupColors[groupLabel] ?? this.#groupColors[objectLabel] ?? '#888',
                 meshes: [node],
                 visible: true,
                 _matType: 'original',
@@ -567,7 +580,7 @@ export class ObjectManager {
       if (!obj.groupId || seen.has(obj.groupId)) return;
       seen.add(obj.groupId);
 
-      const groupConfig = UI_GROUPS.find((group) => group.id === obj.groupId);
+      const groupConfig = this.#getGroupConfig(obj.groupId);
       entries.push({
         groupId: obj.groupId,
         repName: obj.name,

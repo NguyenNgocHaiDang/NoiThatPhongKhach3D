@@ -6,13 +6,21 @@ export class OrbitControls {
   instance;
   #defaultTarget = new THREE.Vector3(0, 1, 0);
 
-  constructor(camera, domElement) {
+  constructor(camera, domElement, options = {}) {
+    const {
+      target = [0, 1, 0],
+      minDistance = 2,
+      maxDistance = 60,
+      maxPolarAngle = Math.PI * 0.85,
+    } = options;
+
+    this.#defaultTarget.set(...target);
     this.instance = new ThreeOrbitControls(camera, domElement);
     this.instance.enableDamping = true;
     this.instance.dampingFactor = 0.06;
-    this.instance.minDistance = 2;
-    this.instance.maxDistance = 60;
-    this.instance.maxPolarAngle = Math.PI * 0.85;
+    this.instance.minDistance = minDistance;
+    this.instance.maxDistance = maxDistance;
+    this.instance.maxPolarAngle = maxPolarAngle;
     this.instance.target.copy(this.#defaultTarget);
     this.instance.update();
   }

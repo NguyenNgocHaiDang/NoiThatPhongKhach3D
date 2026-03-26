@@ -9,6 +9,7 @@ import { UIPanel } from './ui/UIPanel.js';
 import { PriceLabelSystem } from './ui/PriceLabelSystem.js';
 import { Performance } from './utils/Performance.js';
 import { LayoutDesigner } from './interactions/LayoutDesigner.js';
+import { getSceneConfig } from './config/scenes.js';
 
 class App {
   #requestID;
@@ -18,9 +19,15 @@ class App {
   #uiPanel;
   #priceLabelSystem;
   #layoutDesigner;
+  #sceneConfig;
 
-  constructor() {
+  constructor(sceneConfig) {
+    this.#sceneConfig = sceneConfig;
     this.#init();
+  }
+
+  #applySceneMeta() {
+    document.title = this.#sceneConfig.pageTitle;
   }
 
   async #init() {
@@ -30,16 +37,17 @@ class App {
       window.__currentApp.dispose();
     }
     window.__currentApp = this;
+    this.#applySceneMeta();
 
     // ── Core ──────────────────────────────────────
     const canvas = document.getElementById('three-canvas');
     this.#renderer = new Renderer(canvas);
     const { instance: scene } = new SceneSetup();
     this.#scene = scene;
-    const { instance: camera } = new Camera();
+    const { instance: camera } = new Camera(this.#sceneConfig.camera);
 
     // ── Controls ──────────────────────────────────
-    this.#controls = new OrbitControls(camera, canvas);
+    this.#controls = new OrbitControls(camera, canvas, this.#sceneConfig.controls);
 
     // ── Lights ────────────────────────────────────
     this.#setProgress(20, 'Xây dựng hệ thống ánh sáng...');
@@ -47,7 +55,7 @@ class App {
 
     // ── Load 3D Model ─────────────────────────────
     this.#setProgress(30, 'Đang tải mô hình 3D...');
-    const objectManager = new ObjectManager(scene, {
+    const objectManager = new ObjectManager(scene, this.#sceneConfig, {
       onProgress: (pct) => {
         const mapped = 30 + Math.round(pct * 0.5); // 30-80%
         this.#setProgress(mapped, `Đang tải mô hình 3D... ${pct}%`);
@@ -140,4 +148,5 @@ class App {
   }
 }
 
-new App();
+const activeSceneId = document.body.dataset.scene || 'living_room';
+new App(getSceneConfig(activeSceneId));

@@ -4,15 +4,23 @@ export class Camera {
   /** @type {THREE.PerspectiveCamera} */
   instance;
 
-  constructor() {
+  constructor(config = {}) {
+    const {
+      fov = 50,
+      near = 0.1,
+      far = 1000,
+      position = [5, 4, 8],
+      target = [0, 1, 0],
+    } = config;
+
     this.instance = new THREE.PerspectiveCamera(
-      50,
+      fov,
       window.innerWidth / window.innerHeight,
-      0.1,
-      1000
+      near,
+      far,
     );
-    this.instance.position.set(5, 4, 8); // Góc nhìn phòng từ bên ngoài
-    this.instance.lookAt(0, 1, 0);
+    this.instance.position.set(...position);
+    this.instance.lookAt(...target);
   }
 
   resize() {

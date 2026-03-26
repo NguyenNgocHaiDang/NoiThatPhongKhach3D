@@ -140,6 +140,42 @@ button {
   gap: 4px;
 }
 
+.toolbar-price-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.toolbar-price-strip[hidden] {
+  display: none;
+}
+
+.toolbar-price-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid rgba(61, 49, 38, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 252, 247, 0.82);
+  backdrop-filter: blur(8px);
+}
+
+.toolbar-price-name {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.toolbar-price-value {
+  color: var(--accent-strong);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 .brand {
   font-family: var(--font-brand);
   font-size: 2rem;
@@ -162,6 +198,45 @@ button {
 .top-bar-right {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.scene-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  background: var(--surface-strong);
+}
+
+.scene-link {
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition:
+    background var(--transition),
+    color var(--transition),
+    transform var(--transition);
+}
+
+.scene-link:hover {
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.scene-link.active,
+.scene-link[aria-current='page'] {
+  background: var(--accent);
+  color: #fffdf8;
 }
 
 #stats-inline {
@@ -742,6 +817,15 @@ body.panel-collapsed #panel-toggle {
     padding: 14px 16px;
   }
 
+  .top-bar-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .toolbar-price-strip {
+    max-width: 100%;
+  }
+
   .brand {
     font-size: 1.75rem;
   }
@@ -792,6 +876,24 @@ body.panel-collapsed #panel-toggle {
 
   .brand {
     font-size: 1.48rem;
+  }
+
+  .top-bar-right {
+    gap: 10px;
+  }
+
+  .toolbar-price-chip {
+    padding: 6px 9px;
+  }
+
+  .scene-switcher {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .scene-link {
+    flex: 1;
+    text-align: center;
   }
 
   .scene-name,
