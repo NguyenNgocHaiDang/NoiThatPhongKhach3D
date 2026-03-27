@@ -2,6 +2,10 @@
 
 # WEBSITE 3D TƯƠNG TÁC CHO CÁC KHÔNG GIAN NỘI THẤT
 
+## Demo trực tuyến
+
+- Link demo: https://noithatphongkhach3d.netlify.app/
+
 ## Nhóm sinh viên thực hiện
 
 - Nguyễn Ngọc Hải Đăng - 23029048
@@ -175,7 +179,20 @@ npm run preview
 
 ## 7. Hướng dẫn sử dụng nhanh
 
-### 7.1. Tab `Vật thể`
+### 7.1. Điều khiển góc nhìn scene
+
+Người dùng có thể thao tác trực tiếp với scene 3D bằng chuột:
+
+1. Giữ chuột trái và rê để xoay góc nhìn quanh không gian.
+2. Cuộn con lăn chuột để phóng to hoặc thu nhỏ.
+3. Giữ chuột phải và rê để di chuyển khung nhìn ngang hoặc dọc.
+
+Lưu ý:
+
+- Khi đang kéo thả vật thể, điều khiển camera có thể tạm khóa để tránh xung đột thao tác.
+- Mỗi scene có giới hạn zoom khác nhau để giữ góc nhìn ổn định.
+
+### 7.2. Tab `Vật thể`
 
 1. Mở tab `Vật thể`.
 2. Bật `Bật kéo thả`.
@@ -185,14 +202,14 @@ npm run preview
 6. Xoay bằng thanh xoay, nút xoay hoặc phím `Q / E`.
 7. Dùng `Đặt lại vật đã chọn` hoặc `Đặt lại toàn bộ bố cục` nếu cần.
 
-### 7.2. Tab `Vật liệu`
+### 7.3. Tab `Vật liệu`
 
 1. Mở tab `Vật liệu`.
 2. Chọn nhóm vật thể.
 3. Chọn loại vật liệu.
 4. Điều chỉnh màu, độ nhám, độ kim loại nếu loại vật liệu hỗ trợ.
 
-### 7.3. Tab `Ánh sáng`
+### 7.4. Tab `Ánh sáng`
 
 1. Mở tab `Ánh sáng`.
 2. Bật hoặc tắt từng loại đèn.
