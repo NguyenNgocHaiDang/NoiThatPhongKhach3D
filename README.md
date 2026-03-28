@@ -5,6 +5,7 @@
 ## Demo trực tuyến
 
 - Link demo: https://noithatphongkhach3d.netlify.app/
+- Đã kiểm tra phản hồi `HTTP 200` vào ngày `29/03/2026`
 
 ## Nhóm sinh viên thực hiện
 
@@ -14,58 +15,81 @@
 
 ## 1. Giới thiệu đề tài
 
-Đây là đồ án xây dựng website 3D tương tác cho nhiều không gian nội thất trên nền tảng web. Ứng dụng hiện hỗ trợ nhiều scene độc lập, cho phép người dùng xem mô hình 3D trực tiếp trên trình duyệt, thay đổi vật liệu, điều chỉnh ánh sáng, sắp xếp lại bố cục và theo dõi giá các nhóm nội thất trong cùng một giao diện.
+Đây là dự án website 3D tương tác cho nhiều không gian nội thất chạy trực tiếp trên trình duyệt. Ứng dụng được xây dựng theo kiến trúc frontend thuần với `Vite + Three.js`, cho phép tải mô hình 3D, thao tác góc nhìn, thay đổi vật liệu, điều chỉnh ánh sáng, sắp xếp lại bố cục và hiển thị giá theo từng nhóm nội thất.
 
-Phiên bản hiện tại đã mở rộng từ một scene phòng khách sang kiến trúc nhiều trang, nhiều model:
+Phiên bản hiện tại không còn giới hạn ở một scene duy nhất mà đã tổ chức thành mô hình nhiều trang:
 
 - `Phòng khách`
 - `Ngoài trời`
 - `Bếp`
 
-Mỗi scene dùng chung hệ thống render, camera, controls, UI panel, material system, lighting system, drag layout và price display.
+Các scene dùng chung cùng một lớp hạ tầng render, camera, controls, object manager, UI panel, layout interaction và price label system.
 
 ## 2. Mục tiêu thực hiện
 
-- Xây dựng cảnh 3D hiển thị trực tiếp trên trình duyệt bằng WebGL.
-- Hỗ trợ nhiều scene nội thất khác nhau trong cùng một project.
-- Tách mô hình thành các nhóm logic để dễ thao tác, đổi vật liệu và hiển thị giá.
+- Hiển thị mô hình 3D trực tiếp trên nền WebGL trong trình duyệt.
+- Tổ chức nhiều scene nội thất độc lập trong cùng một project.
+- Gom nhóm vật thể theo cấu hình để dễ thao tác, đổi vật liệu và gắn giá.
 - Cho phép kéo thả, xoay và đặt lại bố cục theo thời gian thực.
-- Cho phép thay đổi vật liệu theo từng nhóm đối tượng.
-- Cho phép điều chỉnh nhiều loại ánh sáng từ giao diện.
-- Hiển thị giá sản phẩm theo trạng thái hiển thị của scene.
-- Giữ giao diện đủ gọn để trình diễn trên desktop và laptop phổ thông.
+- Cho phép điều chỉnh vật liệu theo nhóm đối tượng.
+- Cho phép thay đổi ánh sáng từ giao diện.
+- Hỗ trợ trình diễn trên desktop/laptop với giao diện điều khiển gọn.
 
 ## 3. Công nghệ sử dụng
 
-- `Three.js`: dựng đồ họa 3D trên nền WebGL.
-- `Vite`: dev server và công cụ build frontend.
-- `GLTFLoader` và `DRACOLoader`: tải mô hình `gltf/glb` và giải nén mesh tối ưu khi cần.
-- `OrbitControls`: điều khiển camera.
-- `HTML/CSS/JavaScript ES Modules`: giao diện và logic ứng dụng.
+- `Three.js`: dựng scene 3D, camera, ánh sáng, material và raycasting.
+- `Vite`: dev server, build tool và cấu hình multi-page.
+- `GLTFLoader`: tải mô hình `gltf/glb`.
+- `DRACOLoader`: giải nén model Draco cho scene phòng khách.
+- `OrbitControls`: xoay, zoom và pan camera.
+- `HTML/CSS/JavaScript ES Modules`: tổ chức giao diện và logic ứng dụng.
+
+Ghi chú:
+
+- `three`, `vite`, `lil-gui`, `stats.js` đang có trong `package.json`.
+- Giao diện hiện tại đang dùng panel DOM tự xây dựng; không dùng `lil-gui` làm UI chính.
 
 ## 4. Các scene hiện có
 
 ### 4.1. Phòng khách
 
 - Trang: `/`
-- Model: `public/model/living_room/scene_opt.glb`
-- Có hỗ trợ Draco
+- `data-scene`: `living_room`
+- Model chạy thực tế: `public/model/living_room/scene_opt.glb`
+- Có dùng `DRACOLoader`
+- Cấu hình chính: `src/config/scenes.js` + `src/config/uiGroups.js`
 
 ### 4.2. Ngoài trời
 
 - Trang: `/outdoor.html`
-- Model: `public/model/low_poly_outdoor_furniture_v1./scene.gltf`
+- `data-scene`: `outdoor_furniture`
+- Model chạy thực tế: `public/model/low_poly_outdoor_furniture_v1./scene.gltf`
+- Không dùng Draco
+- Cấu hình chính: `src/config/scenes.js` + `src/config/outdoorFurnitureGroups.js`
 
 ### 4.3. Bếp
 
 - Trang: `/kitchen.html`
-- Model: `public/model/kitchen_furniture/scene.gltf`
+- `data-scene`: `kitchen_furniture`
+- Model chạy thực tế: `public/model/kitchen_furniture/scene.gltf`
+- Không dùng Draco
+- Cấu hình chính: `src/config/scenes.js` + `src/config/kitchenFurnitureGroups.js`
 
 ## 5. Chức năng hiện có
 
-### 5.1. Hiển thị scene 3D theo từng trang
+### 5.1. Khởi tạo scene theo từng trang
 
-Mỗi trang HTML gắn với một `scene config` riêng trong `src/config/scenes.js`. Khi ứng dụng khởi động, `src/main.js` sẽ đọc `data-scene` từ `body` để chọn đúng model, camera, controls, group config và metadata của scene.
+Mỗi file HTML gắn với một `data-scene` riêng trên thẻ `body`. Khi ứng dụng khởi động, `src/main.js` đọc giá trị này và lấy cấu hình tương ứng từ `src/config/scenes.js` để dựng:
+
+- renderer
+- scene
+- camera
+- orbit controls
+- light system
+- object manager
+- UI panel
+- price label system
+- layout designer
 
 ### 5.2. Điều khiển camera
 
@@ -73,33 +97,36 @@ Người dùng có thể:
 
 - giữ chuột trái để xoay góc nhìn
 - cuộn chuột để zoom
-- giữ chuột phải để pan cảnh
+- giữ chuột phải để pan
 
-Mỗi scene có cấu hình camera và giới hạn zoom riêng.
+Mỗi scene có cấu hình camera, `target`, `minDistance`, `maxDistance` và `maxPolarAngle` riêng.
 
 ### 5.3. Sắp xếp bố cục nội thất
 
-Trong tab `Vật thể`, hệ thống hỗ trợ chỉnh bố cục trực tiếp trong scene:
+Tab `Vật thể` hỗ trợ thao tác trực tiếp với các nhóm nội thất có cấu hình kéo thả:
 
-- bật `Bật kéo thả` để vào chế độ chỉnh
-- chọn các nhóm được phép thao tác trong danh sách
+- bật `Bật kéo thả`
+- chọn các cụm vật thể muốn hiển thị và cho phép chỉnh
 - click trực tiếp vật thể trong scene để chọn
-- kéo vật thể để thay đổi vị trí
-- xoay vật bằng thanh `Góc xoay`, nút `Xoay trái`, `Xoay phải` hoặc phím `Q / E`
+- kéo để đổi vị trí
+- xoay bằng thanh `Góc xoay`, nút `Xoay trái`, `Xoay phải` hoặc phím `Q / E`
 - đặt lại vật đã chọn hoặc đặt lại toàn bộ bố cục
 
-Một số hành vi chính của layout system:
+Hành vi đang chạy thực tế trong mã nguồn:
 
-- camera `OrbitControls` sẽ tạm khóa trong lúc kéo để tránh xung đột thao tác
-- vật thể có thể rơi về nền nếu không có mặt đỡ hợp lệ bên dưới
-- các object trong cùng một group có thể được gom theo `layout cluster` để thao tác thuận tiện hơn
-- mỗi scene có thể định nghĩa `layoutClusterRules` riêng trong config
+- khi kéo vật thể, `OrbitControls` sẽ bị khóa tạm thời để tránh xung đột thao tác
+- hệ thống raycast tìm bề mặt đỡ phù hợp trước khi thả vật
+- nếu không tìm được mặt đỡ phù hợp, vật sẽ rơi về mặt sàn của scene
+- các object trong cùng một nhóm có thể được gom thành nhiều `layout cluster`
+- một số scene có `layoutClusterRules` riêng để gom cụm chính xác hơn
+
+Lưu ý:
+
+- danh sách tick trong tab `Vật thể` hiện vừa đóng vai trò chọn cụm được phép chỉnh, vừa điều khiển việc ẩn/hiện các cụm đó trong scene
 
 ### 5.4. Thay đổi vật liệu theo nhóm
 
-Trong tab `Vật liệu`, người dùng có thể chọn từng nhóm và đổi vật liệu theo thời gian thực.
-
-Các loại vật liệu đang hỗ trợ:
+Tab `Vật liệu` cho phép áp dụng vật liệu cho toàn bộ object trong cùng một nhóm. Các loại vật liệu hiện có:
 
 - `original`
 - `standard`
@@ -108,40 +135,58 @@ Các loại vật liệu đang hỗ trợ:
 - `wireframe`
 - `normal`
 
-Ngoài ra giao diện còn hỗ trợ:
+Người dùng có thể:
 
+- chọn nhóm vật thể
 - đổi màu
 - chỉnh `roughness`
 - chỉnh `metalness`
 
+Trong đó:
+
+- `roughness` áp dụng cho `standard` và `phong`
+- `metalness` áp dụng cho `standard`
+- `original` trả vật liệu về trạng thái gốc của model
+
 ### 5.5. Điều chỉnh ánh sáng
 
-Ứng dụng hiện hỗ trợ:
+Tab `Ánh sáng` hiện cho phép bật/tắt và chỉnh trực tiếp:
 
 - Ambient Light
 - Directional Light
 - Point Light
 - Spot Light
 
-Người dùng có thể bật hoặc tắt từng đèn, thay đổi cường độ và đổi màu trực tiếp từ giao diện.
+Ngoài ra trong scene còn có một `HemisphereLight` được tạo sẵn trong `LightSystem` để bổ trợ ánh sáng nền, nhưng không có control riêng trong panel.
 
-### 5.6. Hiển thị giá
+### 5.6. Hiển thị giá theo nhóm
 
-Hệ thống giá hiện hoạt động theo 2 lớp:
+Giá được khai báo tĩnh trong các file cấu hình nhóm tại `src/config/`.
 
-- `toolbar price strip`: luôn hiển thị trên thanh trên cùng cho tất cả nhóm đang `visible` và có khai báo `price`
-- `floating price label`: chỉ hiện trực tiếp trên model khi scene chỉ còn đúng một nhóm có giá đang hiển thị
+Hệ thống hiển thị giá gồm 2 lớp:
 
-Giá được khai báo trong các file group config tại `src/config/`.
+- `toolbar price strip`: hiện ở thanh trên cùng cho mọi nhóm đang hiển thị và có khai báo `price`
+- `floating price label`: chỉ hiện trực tiếp trên mô hình khi tại thời điểm đó chỉ còn đúng `1` nhóm có giá đang hiển thị
 
-### 5.7. Theo dõi hiệu năng
+### 5.7. Màn hình tải và chuyển scene
 
-Thanh trên cùng có hiển thị:
+Ứng dụng có:
 
-- FPS
-- Draw calls
+- loading screen trong lúc khởi tạo scene và tải mô hình
+- thanh điều hướng giữa 3 trang scene trên top bar
+- cập nhật `document.title` theo từng scene
 
-để hỗ trợ kiểm tra hiệu năng khi trình diễn model.
+### 5.8. Theo dõi hiệu năng
+
+Top bar hiện có HUD hiển thị:
+
+- `FPS`
+- `DC`
+
+Ghi chú kỹ thuật:
+
+- `FPS` được cập nhật theo số khung hình thực tế
+- `DC` trong phiên bản hiện tại là chỉ báo mô phỏng nhẹ để hỗ trợ trình diễn nhanh, chưa phải số `draw calls` đo trực tiếp từ `renderer.info`
 
 ## 6. Cách chạy dự án
 
@@ -157,7 +202,9 @@ npm install
 npm run dev
 ```
 
-Sau đó truy cập một trong các trang:
+Theo `vite.config.js`, dev server mặc định chạy ở cổng `5173` và tự mở trình duyệt.
+
+Sau đó có thể truy cập:
 
 ```text
 http://localhost:5173/
@@ -171,6 +218,12 @@ http://localhost:5173/kitchen.html
 npm run build
 ```
 
+Project hiện build theo kiểu multi-page và tạo ra:
+
+- `dist/index.html`
+- `dist/outdoor.html`
+- `dist/kitchen.html`
+
 ### 6.4. Xem trước bản build
 
 ```bash
@@ -179,42 +232,35 @@ npm run preview
 
 ## 7. Hướng dẫn sử dụng nhanh
 
-### 7.1. Điều khiển góc nhìn scene
+### 7.1. Điều khiển góc nhìn
 
-Người dùng có thể thao tác trực tiếp với scene 3D bằng chuột:
+1. Giữ chuột trái và rê để xoay góc nhìn.
+2. Cuộn con lăn để phóng to hoặc thu nhỏ.
+3. Giữ chuột phải và rê để pan.
 
-1. Giữ chuột trái và rê để xoay góc nhìn quanh không gian.
-2. Cuộn con lăn chuột để phóng to hoặc thu nhỏ.
-3. Giữ chuột phải và rê để di chuyển khung nhìn ngang hoặc dọc.
-
-Lưu ý:
-
-- Khi đang kéo thả vật thể, điều khiển camera có thể tạm khóa để tránh xung đột thao tác.
-- Mỗi scene có giới hạn zoom khác nhau để giữ góc nhìn ổn định.
-
-### 7.2. Tab `Vật thể`
+### 7.2. Sắp xếp vật thể
 
 1. Mở tab `Vật thể`.
 2. Bật `Bật kéo thả`.
-3. Tick các nhóm muốn cho phép chỉnh.
-4. Click trực tiếp vật thể trong scene để chọn.
-5. Kéo vật để đổi vị trí.
+3. Tick các cụm muốn hiển thị và chỉnh sửa.
+4. Click trực tiếp trong scene để chọn cụm.
+5. Kéo vật thể để đổi vị trí.
 6. Xoay bằng thanh xoay, nút xoay hoặc phím `Q / E`.
-7. Dùng `Đặt lại vật đã chọn` hoặc `Đặt lại toàn bộ bố cục` nếu cần.
+7. Dùng `Đặt lại vật đã chọn` hoặc `Đặt lại toàn bộ bố cục` khi cần.
 
-### 7.3. Tab `Vật liệu`
+### 7.3. Đổi vật liệu
 
 1. Mở tab `Vật liệu`.
-2. Chọn nhóm vật thể.
+2. Chọn đối tượng trong danh sách.
 3. Chọn loại vật liệu.
-4. Điều chỉnh màu, độ nhám, độ kim loại nếu loại vật liệu hỗ trợ.
+4. Điều chỉnh màu, độ nhám và độ kim loại nếu loại vật liệu hỗ trợ.
 
-### 7.4. Tab `Ánh sáng`
+### 7.4. Chỉnh ánh sáng
 
 1. Mở tab `Ánh sáng`.
 2. Bật hoặc tắt từng loại đèn.
 3. Điều chỉnh cường độ.
-4. Đổi màu ánh sáng nếu cần.
+4. Đổi màu cho Directional, Point hoặc Spot Light.
 
 ## 8. Cấu trúc thư mục chính
 
@@ -224,6 +270,7 @@ Lưu ý:
 ├── outdoor.html
 ├── kitchen.html
 ├── package.json
+├── package-lock.json
 ├── vite.config.js
 ├── public/
 │   └── model/
@@ -246,76 +293,19 @@ Lưu ý:
 
 ## 9. Mô tả các thành phần chính trong source code
 
-- `src/main.js`: khởi tạo ứng dụng theo scene đang active, dựng renderer, scene, camera, controls, UI và render loop.
+- `src/main.js`: khởi tạo app theo `data-scene`, quản lý loading screen, UI và render loop.
 - `src/config/scenes.js`: cấu hình trung tâm cho từng scene, gồm model path, camera, controls, group config, material names và màu nhóm.
-- `src/config/uiGroups.js`: nhóm cấu hình cho scene phòng khách.
-- `src/config/outdoorFurnitureGroups.js`: nhóm cấu hình cho scene ngoài trời.
-- `src/config/kitchenFurnitureGroups.js`: nhóm cấu hình cho scene bếp.
-- `src/core/Renderer.js`: cấu hình WebGL renderer.
-- `src/core/Scene.js`: khởi tạo scene.
-- `src/core/Camera.js`: thiết lập camera phối cảnh.
-- `src/controls/OrbitControls.js`: điều khiển camera và hỗ trợ focus/reset focus.
+- `src/config/uiGroups.js`: khai báo nhóm nội thất của scene phòng khách.
+- `src/config/outdoorFurnitureGroups.js`: khai báo nhóm nội thất của scene ngoài trời.
+- `src/config/kitchenFurnitureGroups.js`: khai báo nhóm nội thất của scene bếp.
+- `src/core/Renderer.js`: tạo và resize WebGL renderer.
+- `src/core/Scene.js`: khởi tạo scene nền.
+- `src/core/Camera.js`: tạo camera phối cảnh.
+- `src/controls/OrbitControls.js`: bọc `OrbitControls` của Three.js và quản lý focus/target.
+- `src/lights/LightSystem.js`: tạo và điều khiển hệ thống đèn.
+- `src/materials/MaterialLibrary.js`: thư viện preset vật liệu để đổi nhanh theo nhóm.
+- `src/objects/ObjectManager.js`: tải model, ánh xạ object vào group, tạo layout cluster, quản lý visibility, material, anchor và dữ liệu thao tác.
 - `src/interactions/LayoutDesigner.js`: xử lý chọn vật thể, kéo thả, xoay, reset bố cục và placement logic.
-- `src/objects/ObjectManager.js`: tải mô hình, tách/đăng ký object, group mesh, quản lý visibility, material, anchor, drag groups và layout clusters.
-- `src/lights/LightSystem.js`: quản lý hệ thống ánh sáng.
-- `src/ui/UIPanel.js`: xử lý tab vật thể, vật liệu và ánh sáng.
-- `src/ui/PriceLabelSystem.js`: render giá trên toolbar và label giá nổi trên model.
-- `src/styles/main.css`: giao diện toàn bộ ứng dụng.
-- `src/utils/Performance.js`: hiển thị FPS và draw calls.
-
-## 10. Cách cấu hình group và giá
-
-Mỗi scene có thể khai báo danh sách nhóm tại `src/config/`.
-
-Ví dụ:
-
-```js
-export const KITCHEN_FURNITURE_UI_GROUPS = [
-  {
-    id: 'kitchen_table_group',
-    label: 'Bàn ăn gỗ',
-    price: '6.800.000đ',
-    members: ['Table_Kitchen_A_2'],
-  },
-];
-```
-
-Ý nghĩa các trường:
-
-- `id`: mã định danh của group
-- `label`: tên hiển thị trong UI
-- `price`: giá hiển thị trên toolbar và price label
-- `members`: danh sách object hoặc tên node dùng để map mesh vào group
-
-Muốn đổi tên nhóm hoặc giá, chỉ cần sửa trực tiếp trong file config tương ứng.
-
-## 11. Kiến trúc scene hiện tại
-
-Project hiện không còn hard-code riêng cho từng model. Thay vào đó:
-
-- mỗi trang HTML chọn `data-scene`
-- `src/config/scenes.js` cung cấp cấu hình cho scene tương ứng
-- `ObjectManager` dùng config đó để load model, map tên object, tạo group và sinh danh sách thao tác
-
-Nhờ vậy có thể thêm scene mới bằng cách:
-
-1. thêm model vào `public/model/...`
-2. tạo file group config nếu cần
-3. thêm scene vào `src/config/scenes.js`
-4. tạo trang HTML mới
-5. thêm entry vào `vite.config.js`
-
-## 12. Yêu cầu phần cứng và phần mềm
-
-- trình duyệt hiện đại hỗ trợ WebGL
-- Node.js và npm để cài đặt, chạy và build dự án
-- máy tính có GPU tích hợp hoặc GPU rời thông dụng để xem scene mượt hơn
-
-## 13. Trạng thái hiện tại của dự án
-
-- đã hỗ trợ 3 scene độc lập: phòng khách, ngoài trời, bếp
-- đã hỗ trợ multi-page build bằng Vite
-- đã hỗ trợ toolbar hiển thị giá theo nhóm đang visible
-- đã hỗ trợ label giá nổi khi chỉ còn một nhóm
-- đã hỗ trợ đổi vật liệu, chỉnh ánh sáng, kéo thả bố cục và reset layout
-- có thể build và triển khai dưới dạng website tĩnh
+- `src/ui/UIPanel.js`: xử lý toàn bộ tương tác panel DOM cho tab vật thể, vật liệu và ánh sáng.
+- `src/ui/PriceLabelSystem.js`: hiển thị giá trên top bar và label nổi trong scene.
+- `src/utils/Performance.js`: cập nhật HUD hiệu năng.
