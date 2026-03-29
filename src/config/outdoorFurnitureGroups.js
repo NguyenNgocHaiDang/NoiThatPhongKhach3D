@@ -1,0 +1,87 @@
+export const OUTDOOR_FURNITURE_UI_GROUPS = [
+  {
+    id: 'outdoor_sofa_group',
+    label: 'Sofa sân vườn',
+    price: '7.900.000đ',
+    members: ['Couch', 'Couch_Material.007_0', 'Couch_Material.005_0', 'Couch_Material.008_0', 'Couch_Material.009_0'],
+  },
+  {
+    id: 'outdoor_ottoman_group',
+    label: 'Ghế đôn đệm',
+    price: '2.150.000đ',
+    members: [
+      'Stool couch style',
+      'Stool couch style_Material.007_0',
+      'Stool couch style_Material.005_0',
+      'Stool couch style_Material.008_0',
+      'Stool couch style_Material.009_0',
+    ],
+  },
+  {
+    id: 'outdoor_table_group',
+    label: 'Bàn gỗ chữ nhật',
+    price: '3.850.000đ',
+    members: ['Table', 'Table_Material.007_0', 'Table_Material.005_0', 'Table_Material.006_0'],
+  },
+  {
+    id: 'outdoor_side_stool_group',
+    label: 'Ghế đôn nhỏ',
+    price: '1.280.000đ',
+    members: ['Stool Coffee table', 'Stool Coffee table_Material.002_0', 'Stool Coffee table_Material.001_0'],
+  },
+  {
+    id: 'outdoor_coffee_table_group',
+    label: 'Bàn trà tròn',
+    price: '1.760.000đ',
+    members: ['Coffee table', 'Coffee table_Material.002_0', 'Coffee table_Material.001_0'],
+  },
+  {
+    id: 'outdoor_bench_group',
+    label: 'Bàn gỗ kèm ghế',
+    price: '2.420.000đ',
+    members: ['Bench Table', 'Bench Table_Material.007_0', 'Bench Table_Material.005_0'],
+  },
+  {
+    id: 'outdoor_cylinder_bench_group',
+    label: 'Bàn gỗ tròn kèm ghế',
+    price: '2.180.000đ',
+    members: ['Cylinder Bench Table', 'Cylinder Bench Table_Material.007_0', 'Cylinder Bench Table_Material.005_0'],
+  },
+  {
+    id: 'outdoor_flower_pot_group',
+    label: 'Chậu cây nhỏ',
+    price: '920.000đ',
+    members: [
+      'Flower Pot',
+      'Flower Pot_Material.010_0',
+      'Flower Pot_Material.011_0',
+      'Flower Pot_Material.013_0',
+      'Flower Pot_Material.012_0',
+      'Flower Pot_Material.009_0',
+    ],
+  },
+  {
+    id: 'outdoor_umbrella_blue_group',
+    label: 'Dù xanh',
+    price: '2.690.000đ',
+    members: ['Umbrella Blue', 'Umbrella Blue_Material.003_0', 'Umbrella Blue_Material.008_0', 'Umbrella Blue_Material.009_0'],
+  },
+  {
+    id: 'outdoor_umbrella_red_group',
+    label: 'Dù đỏ',
+    price: '2.690.000đ',
+    members: ['Umbrella Red', 'Umbrella Red_Material.003_0', 'Umbrella Red_Material.008_0', 'Umbrella Red_Material.012_0'],
+  },
+  {
+    id: 'outdoor_plant_group',
+    label: 'Chậu cây lớn',
+    price: '780.000đ',
+    members: ['Plant', 'Plant_Material.010_0', 'Plant_Material.002_0', 'Plant_Material.014_0'],
+  },
+  {
+    id: 'outdoor_campfire_group',
+    label: 'Bồn lửa',
+    price: '3.450.000đ',
+    members: ['Campfire', 'Campfire_Material.007_0', 'Campfire_Material.003_0', 'Campfire_Material.015_0'],
+  },
+];

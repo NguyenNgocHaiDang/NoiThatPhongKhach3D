@@ -58,44 +58,22 @@ export class LayoutDesigner {
 
   #initUI() {
     this.#renderControlledItems();
-    this.#refreshObjectSelect();
-
-    const select = document.getElementById('layout-object-select');
-    select?.addEventListener('change', () => {
-      this.#selectGroup(select.value || null);
-    });
 
     document.getElementById('layout-select-all-btn')?.addEventListener('click', () => {
       this.#enabledNames = new Set(this.#draggableEntries.map(({ repName }) => repName));
       this.#syncControlledVisibility();
       this.#renderControlledItems();
-      this.#refreshObjectSelect();
-      this.#renderStatus();
     });
 
     document.getElementById('layout-clear-all-btn')?.addEventListener('click', () => {
       this.#enabledNames.clear();
       this.#syncControlledVisibility();
       this.#renderControlledItems();
-      this.#refreshObjectSelect();
-      this.#renderStatus();
     });
 
     const toggle = document.getElementById('layout-mode-toggle');
     toggle?.addEventListener('change', () => {
       this.#setEnabled(toggle.checked);
-    });
-
-    document.getElementById('reset-layout-btn')?.addEventListener('click', () => {
-      if (!this.#selectedName) return;
-      this.#objectManager.resetGroupPosition(this.#selectedName);
-      this.#renderStatus();
-    });
-
-    document.getElementById('reset-all-layout-btn')?.addEventListener('click', () => {
-      this.#objectManager.resetAllGroupPositions();
-      this.#updateRotationUI();
-      this.#renderStatus();
     });
 
     document.getElementById('rotate-left-btn')?.addEventListener('click', () => {
@@ -106,13 +84,25 @@ export class LayoutDesigner {
       this.#rotateSelected(LayoutDesigner.#ROTATE_STEP);
     });
 
-    const rotationSlider = document.getElementById('layout-rotation');
-    rotationSlider?.addEventListener('input', () => {
+    document.getElementById('layout-rotation')?.addEventListener('input', (event) => {
       if (!this.#selectedName) return;
-      const degrees = Number(rotationSlider.value);
+      const degrees = Number(event.currentTarget.value);
       this.#objectManager.setGroupRotationY(this.#selectedName, THREE.MathUtils.degToRad(degrees));
-      this.#updateRotationUI();
+      this.#updateActionButtons();
       this.#renderStatus();
+    });
+
+    document.getElementById('reset-layout-btn')?.addEventListener('click', () => {
+      if (!this.#selectedName) return;
+      this.#objectManager.resetGroupPosition(this.#selectedName);
+      this.#renderStatus();
+      this.#updateActionButtons();
+    });
+
+    document.getElementById('reset-all-layout-btn')?.addEventListener('click', () => {
+      this.#objectManager.resetAllGroupPositions();
+      this.#renderStatus();
+      this.#updateActionButtons();
     });
   }
 
@@ -327,11 +317,7 @@ export class LayoutDesigner {
 
     this.#selectedName = nextName;
     this.#objectManager.setSelectionHighlight(nextName);
-
-    const select = document.getElementById('layout-object-select');
-    if (select) select.value = nextName ?? '';
-
-    this.#updateRotationUI();
+    this.#updateActionButtons();
     this.#renderStatus();
   }
 
@@ -356,7 +342,6 @@ export class LayoutDesigner {
           this.#enabledNames.delete(repName);
         }
         this.#syncControlledVisibility();
-        this.#refreshObjectSelect();
         this.#renderControlledItems();
         this.#renderStatus();
       });
@@ -373,37 +358,12 @@ export class LayoutDesigner {
     }
   }
 
-  #refreshObjectSelect() {
-    const select = document.getElementById('layout-object-select');
-    if (!select) return;
-
-    select.innerHTML = '';
-
-    const placeholder = document.createElement('option');
-    placeholder.value = '';
-    placeholder.textContent =
-      this.#enabledNames.size > 0 ? 'Chọn vật thể để sắp xếp' : 'Hãy bật ít nhất 1 vật thể để chỉnh';
-    select.appendChild(placeholder);
-
-    this.#draggableEntries
-      .filter(({ repName }) => this.#enabledNames.has(repName))
-      .forEach(({ repName, label }) => {
-        const option = document.createElement('option');
-        option.value = repName;
-        option.textContent = label;
-        select.appendChild(option);
-      });
-
-    if (!this.#selectedName || !this.#enabledNames.has(this.#selectedName)) {
-      this.#selectGroup(null);
-      return;
-    }
-
-    select.value = this.#selectedName;
-  }
-
   #syncControlledVisibility() {
+    if (this.#selectedName && !this.#enabledNames.has(this.#selectedName)) {
+      this.#selectGroup(null);
+    }
     this.#objectManager.setLayoutVisibility(this.#enabledNames);
+    this.#renderStatus();
   }
 
   #rotateSelected(deltaRadians) {
@@ -411,7 +371,7 @@ export class LayoutDesigner {
 
     const current = this.#objectManager.getGroupRotationY(this.#selectedName);
     this.#objectManager.setGroupRotationY(this.#selectedName, LayoutDesigner.#normalizeRadians(current + deltaRadians));
-    this.#updateRotationUI();
+    this.#updateActionButtons();
     this.#renderStatus();
   }
 
@@ -419,20 +379,21 @@ export class LayoutDesigner {
     return THREE.MathUtils.euclideanModulo(radians + Math.PI, Math.PI * 2) - Math.PI;
   }
 
-  #updateRotationUI() {
-    const rotationSlider = document.getElementById('layout-rotation');
-    const rotationValue = document.getElementById('layout-rotation-value');
+  #updateActionButtons() {
+    const hasSelection = Boolean(this.#selectedName) && this.#enabled;
     const rotateLeftBtn = document.getElementById('rotate-left-btn');
     const rotateRightBtn = document.getElementById('rotate-right-btn');
     const resetLayoutBtn = document.getElementById('reset-layout-btn');
+    const rotationSlider = document.getElementById('layout-rotation');
+    const rotationValue = document.getElementById('layout-rotation-value');
 
-    const hasSelection = Boolean(this.#selectedName);
     if (rotateLeftBtn) rotateLeftBtn.disabled = !hasSelection;
     if (rotateRightBtn) rotateRightBtn.disabled = !hasSelection;
     if (resetLayoutBtn) resetLayoutBtn.disabled = !hasSelection;
     if (rotationSlider) rotationSlider.disabled = !hasSelection;
 
     if (!rotationSlider || !rotationValue) return;
+
     if (!hasSelection) {
       rotationSlider.value = '0';
       rotationValue.textContent = '0°';
@@ -440,9 +401,9 @@ export class LayoutDesigner {
     }
 
     const radians = LayoutDesigner.#normalizeRadians(this.#objectManager.getGroupRotationY(this.#selectedName));
-    const normalizedDegrees = Math.round(THREE.MathUtils.radToDeg(radians));
-    rotationSlider.value = String(normalizedDegrees);
-    rotationValue.textContent = `${normalizedDegrees}°`;
+    const degrees = Math.round(THREE.MathUtils.radToDeg(radians));
+    rotationSlider.value = String(degrees);
+    rotationValue.textContent = `${degrees}°`;
   }
 
   #getSelectedLabel() {
@@ -451,30 +412,30 @@ export class LayoutDesigner {
   }
 
   #renderStatus() {
-    const status = document.getElementById('layout-status');
-    if (!status) return;
+    const selectedLabel = this.#getSelectedLabel();
+    const footer = document.getElementById('footer');
+    if (!footer) return;
 
     if (!this.#enabled) {
-      status.textContent = 'Bật chế độ kéo thả để chọn đồ nội thất, di chuyển và xoay theo ý muốn.';
+      footer.textContent = 'Giữ chuột để xoay cảnh, cuộn để zoom. Bật kéo thả, click vật thể trong cảnh để di chuyển, dùng phím Q/E để xoay.';
       return;
     }
 
     if (this.#enabledNames.size === 0) {
-      status.textContent = 'Chưa có vật thể nào được bật để chỉnh. Hãy tick các món khách cần thao tác.';
+      footer.textContent = 'Chưa có vật thể nào được bật để chỉnh. Hãy tick các món khách cần thao tác.';
       return;
     }
 
-    const selectedLabel = this.#getSelectedLabel();
     if (this.#isDragging && selectedLabel) {
-      status.textContent = `Đang kéo "${selectedLabel}". Thả chuột để chốt vị trí mới.`;
+      footer.textContent = `Đang kéo "${selectedLabel}". Thả chuột để chốt vị trí mới. Dùng phím Q/E để xoay khi cần.`;
       return;
     }
 
     if (selectedLabel) {
-      status.textContent = `Đã chọn "${selectedLabel}". Kéo để di chuyển, dùng nút xoay hoặc phím Q/E để xoay.`;
+      footer.textContent = `Đã chọn "${selectedLabel}". Kéo để di chuyển, dùng phím Q/E để xoay.`;
       return;
     }
 
-    status.textContent = `Đang bật ${this.#enabledNames.size} món để chỉnh. Chọn trong danh sách hoặc click trực tiếp trong cảnh rồi kéo/xoay để sắp xếp.`;
+    footer.textContent = `Đang bật ${this.#enabledNames.size} món để chỉnh. Click trực tiếp trong cảnh rồi kéo để sắp xếp, dùng phím Q/E để xoay.`;
   }
 }

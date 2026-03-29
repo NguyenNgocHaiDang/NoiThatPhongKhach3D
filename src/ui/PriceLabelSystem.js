@@ -3,6 +3,7 @@ export class PriceLabelSystem {
   #camera;
   #container;
   #labels = new Map();
+  #toolbarPriceStrip;
 
   constructor(objectManager, camera) {
     this.#objectManager = objectManager;
@@ -11,6 +12,8 @@ export class PriceLabelSystem {
     this.#container = document.createElement('div');
     this.#container.id = 'price-label-layer';
     document.getElementById('app')?.appendChild(this.#container);
+    this.#toolbarPriceStrip = document.getElementById('toolbar-price-strip');
+    this.#syncToolbarPriceStrip();
   }
 
   dispose() {
@@ -60,6 +63,31 @@ export class PriceLabelSystem {
 
       label.style.display = 'flex';
       label.style.transform = `translate(-50%, -100%) translate(${x}px, ${y}px)`;
+    });
+
+    this.#syncToolbarPriceStrip(visibleGroups);
+  }
+
+  #syncToolbarPriceStrip(visibleGroups = null) {
+    if (!this.#toolbarPriceStrip) return;
+
+    const groups = visibleGroups ?? this.#objectManager.getVisibleGroupEntries().filter((group) => group.priceLabel);
+
+    this.#toolbarPriceStrip.innerHTML = '';
+    this.#toolbarPriceStrip.hidden = groups.length === 0;
+
+    if (!groups.length) {
+      return;
+    }
+
+    groups.forEach((group) => {
+      const item = document.createElement('div');
+      item.className = 'toolbar-price-chip';
+      item.innerHTML = `
+        <span class="toolbar-price-name">${group.label}</span>
+        <span class="toolbar-price-value">${group.priceLabel}</span>
+      `;
+      this.#toolbarPriceStrip.appendChild(item);
     });
   }
 }

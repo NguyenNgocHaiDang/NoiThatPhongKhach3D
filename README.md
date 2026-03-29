@@ -1,6 +1,11 @@
 # TRƯỜNG ĐẠI HỌC SƯ PHẠM KỸ THUẬT VĨNH LONG
 
-# XÂY DỰNG WEBSITE 3D TƯƠNG TÁC CHO KHÔNG GIAN NỘI THẤT PHÒNG KHÁCH
+# WEBSITE 3D TƯƠNG TÁC CHO CÁC KHÔNG GIAN NỘI THẤT
+
+## Demo trực tuyến
+
+- Link demo: https://noithatphongkhach3d.netlify.app/
+- Đã kiểm tra phản hồi `HTTP 200` vào ngày `29/03/2026`
 
 ## Nhóm sinh viên thực hiện
 
@@ -10,60 +15,118 @@
 
 ## 1. Giới thiệu đề tài
 
-Đây là đồ án xây dựng một website 3D tương tác mô phỏng không gian nội thất phòng khách trên nền tảng web. Ứng dụng cho phép người dùng quan sát toàn cảnh, lọc từng nhóm nội thất, thay đổi vật liệu bề mặt, điều chỉnh hệ thống ánh sáng và xem thông tin giá của từng nhóm sản phẩm.
+Đây là dự án website 3D tương tác cho nhiều không gian nội thất chạy trực tiếp trên trình duyệt. Ứng dụng được xây dựng theo kiến trúc frontend thuần với `Vite + Three.js`, cho phép tải mô hình 3D, thao tác góc nhìn, thay đổi vật liệu, điều chỉnh ánh sáng, sắp xếp lại bố cục và hiển thị giá theo từng nhóm nội thất.
 
-Mục tiêu của đề tài là vận dụng kiến thức đồ họa máy tính, WebGL và Three.js để tạo ra một sản phẩm trực quan, dễ thao tác và đủ nền tảng để phát triển thành mô hình showroom nội thất 3D.
+Phiên bản hiện tại không còn giới hạn ở một scene duy nhất mà đã tổ chức thành mô hình nhiều trang:
+
+- `Phòng khách`
+- `Ngoài trời`
+- `Bếp`
+
+Các scene dùng chung cùng một lớp hạ tầng render, camera, controls, object manager, UI panel, layout interaction và price label system.
 
 ## 2. Mục tiêu thực hiện
 
-- Xây dựng một cảnh 3D nội thất có thể hiển thị trực tiếp trên trình duyệt.
-- Cho phép người dùng xoay, zoom và pan camera tự do.
-- Chia mô hình thành nhiều nhóm nội thất logic để phục vụ thao tác lọc và chỉnh sửa.
-- Hỗ trợ thay đổi vật liệu theo từng nhóm đối tượng trong thời gian thực.
-- Hỗ trợ điều chỉnh nhiều loại ánh sáng trong giao diện.
-- Hiển thị giá của sản phẩm ngay trên mô hình khi người dùng tập trung vào từng nhóm.
-- Giữ ứng dụng đủ nhẹ để chạy ổn định trên thiết bị phổ thông.
+- Hiển thị mô hình 3D trực tiếp trên nền WebGL trong trình duyệt.
+- Tổ chức nhiều scene nội thất độc lập trong cùng một project.
+- Gom nhóm vật thể theo cấu hình để dễ thao tác, đổi vật liệu và gắn giá.
+- Cho phép kéo thả, xoay và đặt lại bố cục theo thời gian thực.
+- Cho phép điều chỉnh vật liệu theo nhóm đối tượng.
+- Cho phép thay đổi ánh sáng từ giao diện.
+- Hỗ trợ trình diễn trên desktop/laptop với giao diện điều khiển gọn.
 
 ## 3. Công nghệ sử dụng
 
-- `Three.js`: thư viện dựng đồ họa 3D trên nền WebGL.
-- `Vite`: dev server và công cụ build frontend.
-- `GLTFLoader` và `DRACOLoader`: tải mô hình GLB và giải nén mesh tối ưu.
-- `OrbitControls`: hỗ trợ xoay, zoom, pan camera.
-- `HTML/CSS/JavaScript ES6`: xây dựng giao diện điều khiển và logic ứng dụng.
+- `Three.js`: dựng scene 3D, camera, ánh sáng, material và raycasting.
+- `Vite`: dev server, build tool và cấu hình multi-page.
+- `GLTFLoader`: tải mô hình `gltf/glb`.
+- `DRACOLoader`: giải nén model Draco cho scene phòng khách.
+- `OrbitControls`: xoay, zoom và pan camera.
+- `HTML/CSS/JavaScript ES Modules`: tổ chức giao diện và logic ứng dụng.
 
-## 4. Chức năng hiện có
+Ghi chú:
 
-### 4.1. Hiển thị cảnh 3D nội thất
+- `three`, `vite`, `lil-gui`, `stats.js` đang có trong `package.json`.
+- Giao diện hiện tại đang dùng panel DOM tự xây dựng; không dùng `lil-gui` làm UI chính.
 
-Ứng dụng tải mô hình phòng khách từ file `scene_opt.glb` và hiển thị trực tiếp trên canvas WebGL.
+## 4. Các scene hiện có
 
-### 4.2. Điều khiển camera
+### 4.1. Phòng khách
+
+- Trang: `/`
+- `data-scene`: `living_room`
+- Model chạy thực tế: `public/model/living_room/scene_opt.glb`
+- Có dùng `DRACOLoader`
+- Cấu hình chính: `src/config/scenes.js` + `src/config/uiGroups.js`
+
+### 4.2. Ngoài trời
+
+- Trang: `/outdoor.html`
+- `data-scene`: `outdoor_furniture`
+- Model chạy thực tế: `public/model/low_poly_outdoor_furniture_v1./scene.gltf`
+- Không dùng Draco
+- Cấu hình chính: `src/config/scenes.js` + `src/config/outdoorFurnitureGroups.js`
+
+### 4.3. Bếp
+
+- Trang: `/kitchen.html`
+- `data-scene`: `kitchen_furniture`
+- Model chạy thực tế: `public/model/kitchen_furniture/scene.gltf`
+- Không dùng Draco
+- Cấu hình chính: `src/config/scenes.js` + `src/config/kitchenFurnitureGroups.js`
+
+## 5. Chức năng hiện có
+
+### 5.1. Khởi tạo scene theo từng trang
+
+Mỗi file HTML gắn với một `data-scene` riêng trên thẻ `body`. Khi ứng dụng khởi động, `src/main.js` đọc giá trị này và lấy cấu hình tương ứng từ `src/config/scenes.js` để dựng:
+
+- renderer
+- scene
+- camera
+- orbit controls
+- light system
+- object manager
+- UI panel
+- price label system
+- layout designer
+
+### 5.2. Điều khiển camera
 
 Người dùng có thể:
 
-- Kéo chuột trái để xoay góc nhìn.
-- Cuộn chuột để phóng to hoặc thu nhỏ.
-- Kéo chuột phải để pan cảnh.
+- giữ chuột trái để xoay góc nhìn
+- cuộn chuột để zoom
+- giữ chuột phải để pan
 
-### 4.3. Lọc nhóm nội thất theo dropdown
+Mỗi scene có cấu hình camera, `target`, `minDistance`, `maxDistance` và `maxPolarAngle` riêng.
 
-Trong tab `Vật thể`, người dùng chọn một nhóm nội thất từ dropdown `Nhóm vật thể`.
+### 5.3. Sắp xếp bố cục nội thất
 
-Hành vi hiện tại:
+Tab `Vật thể` hỗ trợ thao tác trực tiếp với các nhóm nội thất có cấu hình kéo thả:
 
-- Chọn `Hiển thị tất cả`: hiện toàn bộ cảnh.
-- Chọn một nhóm cụ thể: chỉ giữ lại nhóm đó trên màn hình, các nhóm khác bị ẩn.
+- bật `Bật kéo thả`
+- chọn các cụm vật thể muốn hiển thị và cho phép chỉnh
+- click trực tiếp vật thể trong scene để chọn
+- kéo để đổi vị trí
+- xoay bằng thanh `Góc xoay`, nút `Xoay trái`, `Xoay phải` hoặc phím `Q / E`
+- đặt lại vật đã chọn hoặc đặt lại toàn bộ bố cục
 
-### 4.4. Focus camera vào nhóm đang chọn
+Hành vi đang chạy thực tế trong mã nguồn:
 
-Khi chọn một nhóm trong dropdown, camera sẽ tự dịch chuyển target để nhóm đó được đưa về giữa màn hình. Khi quay lại `Hiển thị tất cả`, camera trở về vùng nhìn mặc định của phòng.
+- khi kéo vật thể, `OrbitControls` sẽ bị khóa tạm thời để tránh xung đột thao tác
+- hệ thống raycast tìm bề mặt đỡ phù hợp trước khi thả vật
+- nếu không tìm được mặt đỡ phù hợp, vật sẽ rơi về mặt sàn của scene
+- các object trong cùng một nhóm có thể được gom thành nhiều `layout cluster`
+- một số scene có `layoutClusterRules` riêng để gom cụm chính xác hơn
 
-### 4.5. Thay đổi vật liệu theo nhóm
+Lưu ý:
 
-Trong tab `Vật liệu`, người dùng có thể chọn từng nhóm nội thất và thay đổi vật liệu theo thời gian thực.
+- danh sách tick trong tab `Vật thể` hiện vừa đóng vai trò chọn cụm được phép chỉnh, vừa điều khiển việc ẩn/hiện các cụm đó trong scene
 
-Các loại vật liệu đang hỗ trợ:
+### 5.4. Thay đổi vật liệu theo nhóm
+
+Tab `Vật liệu` cho phép áp dụng vật liệu cho toàn bộ object trong cùng một nhóm. Các loại vật liệu hiện có:
 
 - `original`
 - `standard`
@@ -72,57 +135,154 @@ Các loại vật liệu đang hỗ trợ:
 - `wireframe`
 - `normal`
 
-Ngoài ra, giao diện còn cho phép thay đổi:
+Người dùng có thể:
 
-- màu sắc
-- độ nhám `roughness`
-- độ kim loại `metalness`
+- chọn nhóm vật thể
+- đổi màu
+- chỉnh `roughness`
+- chỉnh `metalness`
 
-### 4.6. Điều chỉnh ánh sáng
+Trong đó:
 
-Ứng dụng hiện hỗ trợ:
+- `roughness` áp dụng cho `standard` và `phong`
+- `metalness` áp dụng cho `standard`
+- `original` trả vật liệu về trạng thái gốc của model
+
+### 5.5. Điều chỉnh ánh sáng
+
+Tab `Ánh sáng` hiện cho phép bật/tắt và chỉnh trực tiếp:
 
 - Ambient Light
 - Directional Light
 - Point Light
 - Spot Light
 
-Người dùng có thể bật hoặc tắt từng đèn, thay đổi cường độ và đổi màu trực tiếp từ giao diện.
+Ngoài ra trong scene còn có một `HemisphereLight` được tạo sẵn trong `LightSystem` để bổ trợ ánh sáng nền, nhưng không có control riêng trong panel.
 
-### 4.7. Hiển thị giá trên mô hình
+### 5.6. Hiển thị giá theo nhóm
 
-Mỗi nhóm nội thất trong `src/config/*.js` đều có trường `price`.
+Giá được khai báo tĩnh trong các file cấu hình nhóm tại `src/config/`.
 
-Giá được hiển thị theo cơ chế:
+Hệ thống hiển thị giá gồm 2 lớp:
 
-- Chỉ hiện label giá khi đang tập trung vào đúng một nhóm.
-- Label giá nổi ngay trên model của nhóm đang được hiển thị.
-- Khi ở chế độ `Hiển thị tất cả`, label giá sẽ không hiển thị để tránh rối giao diện.
+- `toolbar price strip`: hiện ở thanh trên cùng cho mọi nhóm đang hiển thị và có khai báo `price`
+- `floating price label`: chỉ hiện trực tiếp trên mô hình khi tại thời điểm đó chỉ còn đúng `1` nhóm có giá đang hiển thị
 
-### 4.8. Theo dõi hiệu năng
+### 5.7. Màn hình tải và chuyển scene
 
-Thanh trên cùng có hiển thị:
+Ứng dụng có:
 
-- FPS
-- số draw call
+- loading screen trong lúc khởi tạo scene và tải mô hình
+- thanh điều hướng giữa 3 trang scene trên top bar
+- cập nhật `document.title` theo từng scene
 
-để hỗ trợ kiểm tra hiệu năng khi trình diễn.
+### 5.8. Theo dõi hiệu năng
 
-## 5. Cấu trúc thư mục chính
+Top bar hiện có HUD hiển thị:
+
+- `FPS`
+- `DC`
+
+Ghi chú kỹ thuật:
+
+- `FPS` được cập nhật theo số khung hình thực tế
+- `DC` trong phiên bản hiện tại là chỉ báo mô phỏng nhẹ để hỗ trợ trình diễn nhanh, chưa phải số `draw calls` đo trực tiếp từ `renderer.info`
+
+## 6. Cách chạy dự án
+
+### 6.1. Cài đặt thư viện
+
+```bash
+npm install
+```
+
+### 6.2. Chạy môi trường phát triển
+
+```bash
+npm run dev
+```
+
+Theo `vite.config.js`, dev server mặc định chạy ở cổng `5173` và tự mở trình duyệt.
+
+Sau đó có thể truy cập:
+
+```text
+http://localhost:5173/
+http://localhost:5173/outdoor.html
+http://localhost:5173/kitchen.html
+```
+
+### 6.3. Build production
+
+```bash
+npm run build
+```
+
+Project hiện build theo kiểu multi-page và tạo ra:
+
+- `dist/index.html`
+- `dist/outdoor.html`
+- `dist/kitchen.html`
+
+### 6.4. Xem trước bản build
+
+```bash
+npm run preview
+```
+
+## 7. Hướng dẫn sử dụng nhanh
+
+### 7.1. Điều khiển góc nhìn
+
+1. Giữ chuột trái và rê để xoay góc nhìn.
+2. Cuộn con lăn để phóng to hoặc thu nhỏ.
+3. Giữ chuột phải và rê để pan.
+
+### 7.2. Sắp xếp vật thể
+
+1. Mở tab `Vật thể`.
+2. Bật `Bật kéo thả`.
+3. Tick các cụm muốn hiển thị và chỉnh sửa.
+4. Click trực tiếp trong scene để chọn cụm.
+5. Kéo vật thể để đổi vị trí.
+6. Xoay bằng thanh xoay, nút xoay hoặc phím `Q / E`.
+7. Dùng `Đặt lại vật đã chọn` hoặc `Đặt lại toàn bộ bố cục` khi cần.
+
+### 7.3. Đổi vật liệu
+
+1. Mở tab `Vật liệu`.
+2. Chọn đối tượng trong danh sách.
+3. Chọn loại vật liệu.
+4. Điều chỉnh màu, độ nhám và độ kim loại nếu loại vật liệu hỗ trợ.
+
+### 7.4. Chỉnh ánh sáng
+
+1. Mở tab `Ánh sáng`.
+2. Bật hoặc tắt từng loại đèn.
+3. Điều chỉnh cường độ.
+4. Đổi màu cho Directional, Point hoặc Spot Light.
+
+## 8. Cấu trúc thư mục chính
 
 ```text
 3DWeb/
 ├── index.html
+├── outdoor.html
+├── kitchen.html
 ├── package.json
+├── package-lock.json
 ├── vite.config.js
 ├── public/
 │   └── model/
-│       └── living_room/
+│       ├── living_room/
+│       ├── low_poly_outdoor_furniture_v1./
+│       └── kitchen_furniture/
 └── src/
     ├── main.js
     ├── config/
     ├── controls/
     ├── core/
+    ├── interactions/
     ├── lights/
     ├── materials/
     ├── objects/
@@ -131,102 +291,21 @@ Thanh trên cùng có hiển thị:
     └── utils/
 ```
 
-## 6. Mô tả các thành phần chính trong source code
+## 9. Mô tả các thành phần chính trong source code
 
-- `src/main.js`: khởi tạo ứng dụng, scene, camera, controls, UI, price label system và vòng lặp render.
-- `src/core/Renderer.js`: cấu hình WebGL renderer.
-- `src/core/Scene.js`: khởi tạo scene.
-- `src/core/Camera.js`: thiết lập camera phối cảnh.
-- `src/controls/OrbitControls.js`: điều khiển camera và hỗ trợ focus vào nhóm đang chọn.
-- `src/objects/ObjectManager.js`: tải mô hình, chia nhóm mesh, đổi vật liệu, ẩn/hiện nhóm và cung cấp tâm nhóm để focus hoặc đặt label giá.
-- `src/lights/LightSystem.js`: quản lý hệ thống ánh sáng.
-- `src/ui/UIPanel.js`: xử lý giao diện cho tab vật thể, vật liệu và ánh sáng.
-- `src/ui/PriceLabelSystem.js`: hiển thị label giá nổi trên model.
-- `src/config/uiGroups.js`: tập hợp toàn bộ group config dùng trong giao diện.
-- `src/config/*.js`: khai báo từng nhóm nội thất với `id`, `label`, `price`, `members`.
-- `src/utils/Performance.js`: hiển thị thông tin hiệu năng.
-
-## 7. Cách cập nhật giá sản phẩm
-
-Giá được cấu hình trực tiếp trong từng file group tại thư mục `src/config/`.
-
-Ví dụ:
-
-```js
-export const BOOKS_GROUP = {
-  id: "books_group",
-  label: "Sách",
-  price: "320.000đ",
-  members: ["Object_25", "Object_604", "Object_605", "Object_606", "Object_607"],
-};
-```
-
-Muốn đổi giá, chỉ cần sửa trường `price` trong file group tương ứng.
-
-## 8. Hướng dẫn chạy dự án
-
-### Cài đặt thư viện
-
-```bash
-npm install
-```
-
-### Chạy môi trường phát triển
-
-```bash
-npm run dev
-```
-
-Sau đó mở trình duyệt tại:
-
-```text
-http://localhost:5173
-```
-
-### Build production
-
-```bash
-npm run build
-```
-
-### Xem trước bản build
-
-```bash
-npm run preview
-```
-
-## 9. Yêu cầu phần cứng và phần mềm
-
-- Trình duyệt hiện đại hỗ trợ WebGL.
-- Máy tính có GPU tích hợp hoặc GPU rời thông dụng.
-- Node.js và npm để cài đặt, chạy và build dự án.
-
-## 10. Kết quả đạt được
-
-- Xây dựng thành công website 3D mô phỏng không gian nội thất phòng khách.
-- Tổ chức được mô hình thành nhiều nhóm nội thất có thể lọc độc lập.
-- Hỗ trợ thay đổi vật liệu theo từng nhóm trong thời gian thực.
-- Hỗ trợ điều chỉnh nhiều loại ánh sáng trực tiếp từ giao diện.
-- Có hiển thị giá nổi trên mô hình cho nhóm đang được tập trung.
-- Có cơ chế tự động focus camera vào nhóm đang chọn.
-- Có thể build và triển khai dưới dạng website tĩnh.
-
-## 11. Hạn chế hiện tại
-
-- Cảnh vẫn sử dụng một mô hình nội thất có sẵn, chưa tự thiết kế toàn bộ từ đầu.
-- Giá hiện đang là dữ liệu tĩnh trong file config, chưa kết nối với cơ sở dữ liệu hay backend.
-- Camera mới focus tức thời vào đối tượng, chưa có animation mượt.
-- Chưa có chức năng lưu cấu hình vật liệu và ánh sáng theo người dùng.
-
-## 12. Hướng phát triển
-
-- Bổ sung thêm nhiều không gian nội thất và nhiều bộ sản phẩm khác nhau.
-- Tách dữ liệu sản phẩm và giá ra thành catalog để dễ quản lý.
-- Tạo animation chuyển camera mượt khi focus sản phẩm.
-- Bổ sung hình ảnh, mô tả và thông tin sản phẩm chi tiết hơn cho từng nhóm nội thất.
-- Tối ưu thêm hiệu năng và giảm dung lượng tải ban đầu.
-- Phát triển theo hướng showroom nội thất 3D hoặc website trưng bày sản phẩm thương mại.
-
-## 13. Kết luận
-
-Đồ án hiện đã hình thành một ứng dụng Web 3D tương tác cho không gian nội thất phòng khách với các chức năng cốt lõi: hiển thị mô hình 3D, điều khiển camera, lọc nhóm nội thất, đổi vật liệu, điều chỉnh ánh sáng và hiển thị giá sản phẩm theo nhóm. Đây là nền tảng phù hợp để tiếp tục mở rộng theo hướng trực quan hóa nội thất và trình diễn sản phẩm trên web.
+- `src/main.js`: khởi tạo app theo `data-scene`, quản lý loading screen, UI và render loop.
+- `src/config/scenes.js`: cấu hình trung tâm cho từng scene, gồm model path, camera, controls, group config, material names và màu nhóm.
+- `src/config/uiGroups.js`: khai báo nhóm nội thất của scene phòng khách.
+- `src/config/outdoorFurnitureGroups.js`: khai báo nhóm nội thất của scene ngoài trời.
+- `src/config/kitchenFurnitureGroups.js`: khai báo nhóm nội thất của scene bếp.
+- `src/core/Renderer.js`: tạo và resize WebGL renderer.
+- `src/core/Scene.js`: khởi tạo scene nền.
+- `src/core/Camera.js`: tạo camera phối cảnh.
+- `src/controls/OrbitControls.js`: bọc `OrbitControls` của Three.js và quản lý focus/target.
+- `src/lights/LightSystem.js`: tạo và điều khiển hệ thống đèn.
+- `src/materials/MaterialLibrary.js`: thư viện preset vật liệu để đổi nhanh theo nhóm.
+- `src/objects/ObjectManager.js`: tải model, ánh xạ object vào group, tạo layout cluster, quản lý visibility, material, anchor và dữ liệu thao tác.
+- `src/interactions/LayoutDesigner.js`: xử lý chọn vật thể, kéo thả, xoay, reset bố cục và placement logic.
+- `src/ui/UIPanel.js`: xử lý toàn bộ tương tác panel DOM cho tab vật thể, vật liệu và ánh sáng.
+- `src/ui/PriceLabelSystem.js`: hiển thị giá trên top bar và label nổi trong scene.
+- `src/utils/Performance.js`: cập nhật HUD hiệu năng.

@@ -5,4 +5,13 @@ export default defineConfig({
     port: 5173,
     open: true,
   },
+  build: {
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+        outdoor: 'outdoor.html',
+        kitchen: 'kitchen.html',
+      },
+    },
+  },
 });

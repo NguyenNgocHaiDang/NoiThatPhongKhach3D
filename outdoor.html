@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Ứng dụng Web 3D tương tác - Thiết kế và lập trình đồ họa nâng cao với Three.js" />
-    <title>Nội thất phòng khách</title>
+    <title>Nội thất ngoài trời</title>
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -13,29 +13,26 @@
       rel="stylesheet"
     />
   </head>
-  <body data-scene="living_room">
+  <body data-scene="outdoor_furniture">
     <div id="app">
-      <!-- Loading Screen -->
       <div id="loading-screen">
         <div class="loader-content">
           <div class="loader-text" id="loader-text">Đang tải</div>
         </div>
       </div>
 
-      <!-- Canvas -->
       <canvas id="three-canvas"></canvas>
 
-      <!-- Top bar -->
       <header id="top-bar">
         <div class="top-bar-left">
-          <span class="brand"><strong>Nội thất</strong> phòng khách</span>
-          <span class="scene-name">Living room experience</span>
+          <span class="brand"><strong>Nội thất</strong> ngoài trời</span>
+          <span class="scene-name">Low poly outdoor furniture</span>
           <div class="toolbar-price-strip" id="toolbar-price-strip" aria-live="polite"></div>
         </div>
         <div class="top-bar-right">
           <nav class="scene-switcher" aria-label="Chuyển trang model">
-            <a class="scene-link active" href="/" aria-current="page">Phòng khách</a>
-            <a class="scene-link" href="/outdoor.html">Ngoài trời</a>
+            <a class="scene-link" href="/">Phòng khách</a>
+            <a class="scene-link active" href="/outdoor.html" aria-current="page">Ngoài trời</a>
             <a class="scene-link" href="/kitchen.html">Bếp</a>
           </nav>
           <div id="stats-inline">
@@ -45,24 +42,20 @@
         </div>
       </header>
 
-      <!-- Panel Toggle Tab (always visible) -->
       <button id="panel-toggle" title="Đóng/Mở panel">‹</button>
 
-      <!-- Side Control Panel -->
       <aside id="control-panel">
         <div class="panel-header">
           <span class="panel-kicker">Điều khiển cảnh</span>
           <span class="panel-title">Bảng điều khiển</span>
         </div>
 
-        <!-- Tab Navigation -->
         <div class="tab-nav">
           <button class="tab-btn active" data-tab="layers">Vật thể</button>
           <button class="tab-btn" data-tab="materials">Vật liệu</button>
           <button class="tab-btn" data-tab="lights">Ánh sáng</button>
         </div>
 
-        <!-- Tab: Layers -->
         <div class="tab-content active" id="tab-layers">
           <div class="section-title">Sắp xếp bố cục</div>
           <div class="light-card layout-card">
@@ -96,7 +89,6 @@
           </div>
         </div>
 
-        <!-- Tab: Materials -->
         <div class="tab-content" id="tab-materials">
           <div class="section-title">Chọn vật liệu cho đối tượng</div>
           <div class="form-group">
@@ -132,11 +124,9 @@
           <button class="apply-btn" id="apply-material-btn">Áp dụng vật liệu</button>
         </div>
 
-        <!-- Tab: Lights -->
         <div class="tab-content" id="tab-lights">
           <div class="section-title">Điều chỉnh ánh sáng</div>
 
-          <!-- Ambient -->
           <div class="light-card">
             <div class="light-card-header">
               <span>Ánh sáng môi trường</span>
@@ -151,7 +141,6 @@
             </div>
           </div>
 
-          <!-- Directional -->
           <div class="light-card">
             <div class="light-card-header">
               <span>Ánh sáng định hướng</span>
@@ -170,7 +159,6 @@
             </div>
           </div>
 
-          <!-- Point Light -->
           <div class="light-card">
             <div class="light-card-header">
               <span>Ánh sáng điểm</span>
@@ -189,7 +177,6 @@
             </div>
           </div>
 
-          <!-- Spot Light -->
           <div class="light-card">
             <div class="light-card-header">
               <span>Ánh sáng chiếu điểm</span>
@@ -210,10 +197,8 @@
         </div>
       </aside>
 
-      <!-- Tooltip -->
       <div id="tooltip" class="tooltip hidden"></div>
 
-      <!-- Bottom info bar -->
       <footer id="bottom-bar">
         <span>Giữ chuột để xoay cảnh, cuộn để zoom. Khi bật kéo thả, click để chọn, kéo để di chuyển, dùng nút hoặc phím Q/E để xoay vật thể.</span>
       </footer>
