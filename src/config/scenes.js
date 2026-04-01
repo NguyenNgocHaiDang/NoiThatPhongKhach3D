@@ -186,7 +186,7 @@ export const SCENE_CONFIGS = {
     id: 'outdoor_furniture',
     pageTitle: 'Nội thất ngoài trời',
     sceneName: 'Low poly outdoor furniture',
-    modelPath: '/model/low_poly_outdoor_furniture_v1./scene.gltf',
+    modelPath: '/model/low_poly_outdoor_furniture_v1/scene.gltf',
     useDraco: false,
     camera: {
       fov: 40,

@@ -63,7 +63,7 @@ Ghi chú:
 
 - Trang: `/outdoor.html`
 - `data-scene`: `outdoor_furniture`
-- Model chạy thực tế: `public/model/low_poly_outdoor_furniture_v1./scene.gltf`
+- Model chạy thực tế: `public/model/low_poly_outdoor_furniture_v1/scene.gltf`
 - Không dùng Draco
 - Cấu hình chính: `src/config/scenes.js` + `src/config/outdoorFurnitureGroups.js`
 
@@ -275,7 +275,7 @@ npm run preview
 ├── public/
 │   └── model/
 │       ├── living_room/
-│       ├── low_poly_outdoor_furniture_v1./
+│       ├── low_poly_outdoor_furniture_v1/
 │       └── kitchen_furniture/
 └── src/
     ├── main.js
